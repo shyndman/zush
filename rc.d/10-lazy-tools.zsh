@@ -8,11 +8,11 @@
 # Node.js via nvm
 zush_lazy_load nvm 'source ~/.nvm/nvm.sh' nvm node npm npx
 
-# Python via pyenv  
+# Python via pyenv
 zush_lazy_load pyenv 'eval "$(pyenv init -)"' pyenv python pip
 
 # Rust via cargo
 zush_lazy_load cargo 'source ~/.cargo/env' cargo rustc rustup
 
 # Homebrew
-zush_lazy_load brew 'eval "$(/opt/homebrew/bin/brew shellenv)"' brew
+zush_lazy_load brew 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' brew
