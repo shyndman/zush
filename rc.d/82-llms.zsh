@@ -1,4 +1,7 @@
-# Function to query LLM and display with mdcat
+# Claude Coded
+alias claude="/home/shyndman/.claude/local/claude"
+
+# Queries an LLM, displaying the result with glow
 q() {
   if [ -z "$1" ]; then
     echo "Usage: ask \"<prompt>\"" >&2
