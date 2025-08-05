@@ -13,7 +13,7 @@ if [[ ! -f "$_eza_theme_file" ]]; then
         zush_error "Cannot download eza theme: curl not available"
         return 1
     fi
-    
+
     zush_debug "Installing eza rose-pine theme"
     mkdir -p "${_eza_theme_file:h}"
     curl -sSL "https://gist.githubusercontent.com/shyndman/01c8e8bfc197cfe8c56f41ca195921d1/raw/d7e584ec00689b55223f76e255991f71616d7051/eza.rose-pine.yml" -o "$_eza_theme_file"
