@@ -246,7 +246,7 @@ EOF
 # Show success message
 show_success() {
     echo ""
-    log_success "Zush installed successfully! 🚀"
+    log_success "Zush installed successfully! 🦥"
     echo ""
     echo "Next steps:"
     echo "  1. ${YELLOW}Restart your shell${NC} or run: source ~/.zshenv"
