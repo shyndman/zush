@@ -18,7 +18,7 @@ zush_profile() {
 zush_startup_time() {
     local end=$(date +%s%3N)
     local duration=$(( end - ZUSH_START_TIME ))
-    printf "Zush startup: %.3fms\n" $(( duration * 1000 ))
+    printf "Zush startup: %.0fms\n" $(( duration ))
 }
 
 # Benchmark a command multiple times
