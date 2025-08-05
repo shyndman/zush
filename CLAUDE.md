@@ -1,8 +1,8 @@
-# Zush - High-Performance ZSH Configuration
+# Zush - Mid-Performance ZSH Configuration
 
 ## Overview
 
-Zush is a modular, performance-focused zsh configuration system designed to achieve sub-100ms startup times while maintaining full functionality. Built from the ground up with lazy loading, automatic compilation, and smart caching strategies.
+Zush is a modular, performance-aware zsh configuration system designed to achieve sub-200ms startup times while maintaining full functionality. Built from the ground up with lazy loading, automatic compilation, smart caching strategies, and instant prompts.
 
 ## Current Implementation
 
@@ -17,14 +17,19 @@ Zush is a modular, performance-focused zsh configuration system designed to achi
 │   ├── profiler.zsh     # performance measurement tools
 │   ├── compiler.zsh     # automatic zcompile functionality
 │   ├── lazy-loader.zsh  # generic lazy loading with environment caching
-│   └── plugin.zsh       # plugin management system (zushp commands)
-├── plugins/             # Third-party plugins
-│   ├── pure/            # Pure prompt theme
-│   └── zsh-autocomplete/ # Advanced autocompletion
+│   ├── plugin.zsh       # plugin management system (zushp commands)
+│   └── instant-prompt.zsh # instant prompt system
+├── plugins/             # Third-party plugins (managed by zushp)
+├── completions/         # Custom completions directory
+│   ├── _zushp           # Plugin manager completions
+│   └── _zushc           # Compiler completions
+├── home/                # Files to copy to user's home
+│   └── .zshenv          # Environment setup for ZDOTDIR
+├── install.sh           # Remote installation script
 └── rc.d/                # Numbered configuration scripts
     ├── 00-profiling.zsh      # profiling setup
     ├── 10-lazy-tools.zsh     # nvm, pyenv, cargo, homebrew lazy loading
-    ├── 15-plugins.zsh        # plugin loading and deferred plugin management
+    ├── 15-plugins.zsh        # personal plugin loading
     ├── 20-zsh-options.zsh    # core zsh behavioral options
     ├── 30-history.zsh        # comprehensive history management
     ├── 40-directory-nav.zsh  # directory navigation enhancements
@@ -33,6 +38,7 @@ Zush is a modular, performance-focused zsh configuration system designed to achi
     ├── 50-editor.zsh         # smart editor selection (local vs remote)
     ├── 60-better-reading.zsh # ov pager, bat, batman integration
     ├── 80-prompt.zsh         # starship prompt with custom config
+    ├── 85-completions.zsh    # completion system setup
     ├── 98-shell-hooks.zsh    # shell environment integration (direnv)
     └── 99-profiling-end.zsh  # startup timing results
 ```
@@ -57,7 +63,26 @@ Zush is a modular, performance-focused zsh configuration system designed to achi
 **4. Performance Monitoring**
 - Built-in profiling with zprof integration
 - Startup timing benchmarks with `ZUSH_PROFILE=1`
-- Per-component load time tracking
+- Per-component load time tracking with millisecond precision
+- Debug logging with timing when profiling is enabled
+
+**5. Instant Prompt System**
+- Shows basic starship prompt immediately on shell start
+- Uses stripped-down starship config with slow modules disabled
+- Seamless handoff to full prompt after Zush loads (~73ms)
+- ANSI cursor positioning for multiline prompt support
+
+**6. Plugin Management**
+- Simple `zushp user/repo` command to install GitHub plugins
+- Automatic git cloning, compilation, and sourcing
+- Plugin update system with `zushp_update`
+- Clean removal with `zushp_clean`
+
+**7. Completion System**
+- Custom completions directory with FPATH integration
+- Late-loading completion system after tools are initialized
+- Tab completion for Zush commands (`zushp`, `zushc`)
+- 24-hour cached compinit for faster startup
 
 ### Current Performance
 
@@ -103,13 +128,34 @@ ZDOTDIR=$PWD ZUSH_PROFILE=1 zsh
 time env ZDOTDIR=$PWD zsh -c exit
 ```
 
+### Installation
+```bash
+# One-line installation
+curl -fsSL https://raw.githubusercontent.com/shyndman/zush/main/install.sh | zsh
+```
+
 ### Production Setup
-1. Set `ZDOTDIR=~/.config/zush`
-2. Copy configuration to `~/.config/zush/`
-3. Customize rc.d scripts as needed
+1. Zush automatically sets `ZDOTDIR=~/.config/zush` via `~/.zshenv`
+2. Customize rc.d scripts as needed
+3. Install plugins with `zushp user/repo`
+
+### Commands
+```bash
+# Plugin Management
+zushp user/repo          # Install plugin from GitHub
+zushp_update             # Update all plugins
+zushp_update plugin-name # Update specific plugin
+zushp_clean              # Remove all plugins
+
+# Compilation
+zushc file.zsh           # Compile single file
+zushc directory/         # Compile directory
+zushc_all               # Compile entire configuration
+zushc_bg                # Background compilation
+```
 
 ### Configuration Variables
-- `ZUSH_PROFILE=1` - Enable startup profiling
+- `ZUSH_PROFILE=1` - Enable startup profiling with timing
 - `ZUSH_DEBUG=1` - Enable debug logging
 - `ZDOTDIR` - Zush configuration directory
 
@@ -136,10 +182,11 @@ time env ZDOTDIR=$PWD zsh -c exit
 
 ### Quality of Life Improvements
 
-**4. Plugin System**
-- Standardized third-party plugin integration
-- Automatic dependency management
-- Plugin performance budgets
+**4. Plugin System** ✅ **IMPLEMENTED**
+- Simple `zushp user/repo` command for GitHub plugins
+- Automatic git cloning, compilation, and sourcing
+- Plugin updates with `zushp_update`
+- Tab completion for plugin management
 
 **5. Configuration Management**
 - `zush update` command for updating themes/configs
