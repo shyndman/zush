@@ -96,7 +96,7 @@ handle_existing_installation() {
 backup_zshenv() {
     if [[ -f "$ZSHENV_FILE" ]]; then
         local backup_file="${ZSHENV_FILE}.old"
-        
+
         log_warning "Existing .zshenv file detected: $ZSHENV_FILE"
         echo "   Zush requires replacing your .zshenv to set ZDOTDIR=~/.config/zush"
         echo "   Your current .zshenv will be renamed to: ${YELLOW}.zshenv.old${NC}"
@@ -295,6 +295,8 @@ main() {
     echo "║     Mid-Performance 🦥 ZSH Config       ║"
     echo "╚═════════════════════════════════════════╝"
     echo "${NC}"
+
+    sleep 1
 
     check_shell
     check_dependencies
