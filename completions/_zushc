@@ -1,0 +1,23 @@
+#compdef zushc zushc_all zushc_bg
+
+# Zush Compiler Completions
+
+_zushc() {
+    local context state line
+    
+    case $service in
+        zushc)
+            _arguments \
+                '*:file or directory:_files -g "*.zsh"' \
+                && return 0
+            ;;
+        zushc_all)
+            # No arguments for compile all
+            ;;
+        zushc_bg)
+            # No arguments for background compile
+            ;;
+    esac
+}
+
+_zushc "$@"
