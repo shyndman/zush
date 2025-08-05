@@ -11,7 +11,6 @@ HISTSIZE=1000000
 # History behavior options
 setopt extended_history        # save timestamps with history entries
 setopt inc_append_history      # write to history file immediately, not on shell exit
-setopt share_history           # share history between all active sessions
 setopt hist_expire_dups_first  # expire duplicate entries first when trimming history
 setopt hist_ignore_all_dups    # delete old entry if new entry is a duplicate
 setopt hist_find_no_dups       # don't display previously found duplicates in search
