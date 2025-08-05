@@ -8,7 +8,6 @@ setopt NONOMATCH            # hide error message if there is no match for the pa
 # Interactive features
 setopt INTERACTIVECOMMENTS  # allow comments in interactive mode
 setopt NOTIFY               # report the status of background jobs immediately
-setopt PROMPTSUBST          # enable command substitution in prompt
 
 # Globbing and expansion
 setopt EXTENDED_GLOB        # enable extended globbing

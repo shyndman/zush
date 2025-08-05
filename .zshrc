@@ -21,6 +21,14 @@ if [[ "${ZUSH_PROFILE:-0}" == "1" ]]; then
     zmodload zsh/zprof
 fi
 
+# Show instant prompt as early as possible (before any heavy loading)
+if [[ -f "${ZUSH_LIB_DIR}/instant-prompt.zsh" ]]; then
+    # Load core functions first for zush_debug (but preserve ZUSH_START_TIME)
+    [[ -f "${ZUSH_LIB_DIR}/core.zsh" ]] && source "${ZUSH_LIB_DIR}/core.zsh"
+    source "${ZUSH_LIB_DIR}/instant-prompt.zsh"
+    zush_show_instant_prompt
+fi
+
 
 # Load utility libraries first
 # These provide functions used by rc.d scripts
@@ -57,6 +65,11 @@ fi
 # Auto-compile all configuration files in the background
 if (( ${+functions[zushc_bg]} )); then
     zushc_bg
+fi
+
+# Hand off instant prompt to real starship
+if (( ${+functions[zush_handoff_to_real_prompt]} )); then
+    zush_handoff_to_real_prompt
 fi
 
 # Clean up (core functions stay available)
