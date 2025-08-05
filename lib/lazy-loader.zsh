@@ -11,6 +11,7 @@
 #   zush_lazy_load nvm 'source ~/.nvm/nvm.sh' nvm node npm npx
 #   zush_lazy_load pyenv 'eval "$(pyenv init -)"' pyenv python pip
 #   zush_lazy_load brew 'eval "$(/opt/homebrew/bin/brew shellenv)"' brew
+#   zush_lazy_load --ignore-stable-env custom 'source ~/.custom/init' custom
 
 # Apply cached environment for a tool
 # Returns 0 if cache exists and was applied, 1 otherwise
@@ -24,8 +25,127 @@ zush_apply_cached_env() {
     source "$cache_file"
 }
 
+# Core tool initialization logic - captures environment changes and caches them
+# Used by both immediate initialization and lazy loading functions
+zush_do_tool_initialization() {
+    local tool=$1
+    local init_command=$2
+    local warn_on_no_changes=${3:-1}  # Default to warning unless explicitly disabled
+    
+    zush_debug "Initializing $tool"
+    
+    # Capture baseline environment
+    local _baseline_path=$PATH
+    local _baseline_fpath=$FPATH
+    local _baseline_env_file=$(mktemp)
+    printenv | sort > "$_baseline_env_file"
+    
+    # Initialize the tool
+    eval "$init_command"
+    
+    # Check if environment actually changed
+    local _new_env_file=$(mktemp)
+    printenv | sort > "$_new_env_file"
+    
+    local has_changes=0
+    
+    # Check for PATH changes
+    if [[ $PATH != $_baseline_path ]]; then
+        has_changes=1
+    fi
+    
+    # Check for FPATH changes
+    if [[ $FPATH != $_baseline_fpath ]]; then
+        has_changes=1
+    fi
+    
+    # Check for new environment variables
+    if [[ $(comm -13 "$_baseline_env_file" "$_new_env_file" | wc -l) -gt 0 ]]; then
+        has_changes=1
+    fi
+    
+    if [[ $has_changes -eq 0 && $warn_on_no_changes -eq 1 ]]; then
+        zush_error "WARNING: Tool '$tool' initialization produced no environment changes!"
+        zush_error "  Command: $init_command"
+        zush_error "  This suggests the tool is not properly installed or the init command is incorrect."
+        zush_error "  Lazy loading for this tool may not work as expected."
+        zush_error "  Use --ignore-stable-env flag if this is expected."
+    fi
+    
+    # Cache environment changes in background
+    (
+        local cache_file="${ZUSH_CACHE_DIR}/${tool}-env"
+        
+        {
+            echo "# Zush environment cache for $tool"
+            echo "# Generated: $(date)"
+            echo
+            
+            # Process PATH additions
+            if [[ $PATH != $_baseline_path ]]; then
+                echo '# PATH additions:'
+                local IFS=:
+                local -a old_paths=(${=_baseline_path})
+                local -a new_paths=(${=PATH})
+                
+                for p in "${new_paths[@]}"; do
+                    local found=0
+                    for op in "${old_paths[@]}"; do
+                        [[ $p == $op ]] && { found=1; break; }
+                    done
+                    if [[ $found -eq 0 ]]; then
+                        printf 'path=(%q $path)\n' "$p"
+                    fi
+                done
+                echo
+            fi
+            
+            # Process FPATH additions
+            if [[ $FPATH != $_baseline_fpath ]]; then
+                echo '# FPATH additions:'
+                local IFS=:
+                local -a old_fpaths=(${=_baseline_fpath})
+                local -a new_fpaths=(${=FPATH})
+                
+                for f in "${new_fpaths[@]}"; do
+                    local found=0
+                    for of in "${old_fpaths[@]}"; do
+                        [[ $f == $of ]] && { found=1; break; }
+                    done
+                    if [[ $found -eq 0 ]]; then
+                        printf 'fpath=(%q $fpath)\n' "$f"
+                    fi
+                done
+                echo
+            fi
+            
+            # Process new environment variables
+            echo '# Environment variables:'
+            comm -13 "$_baseline_env_file" "$_new_env_file" | while IFS= read -r line; do
+                [[ $line =~ ^([^=]+)=(.*)$ ]] || continue
+                local var=${match[1]}
+                local value=${match[2]}
+                
+                # Skip PATH/FPATH (handled above) and empty vars
+                [[ $var == PATH || $var == FPATH || -z $var ]] && continue
+                
+                printf 'export %s=%q\n' "$var" "$value"
+            done
+        } > "$cache_file"
+        
+        zush_debug "Environment cached to $cache_file"
+        rm -f "$_baseline_env_file" "$_new_env_file"
+    ) &!
+}
+
 # Set up lazy loading for a tool with environment caching
 zush_lazy_load() {
+    local ignore_stable_env=0
+    if [[ $1 == "--ignore-stable-env" ]]; then
+        ignore_stable_env=1
+        shift
+    fi
+    
     local tool=$1
     local init_command=$2
     shift 2
@@ -33,8 +153,15 @@ zush_lazy_load() {
 
     zush_debug "Setting up lazy loading for $tool (commands: ${commands[*]})"
 
-    # Apply cached environment immediately if available
-    zush_apply_cached_env "$tool"
+    # Apply cached environment if available, otherwise initialize immediately (unless ignoring stable env)
+    if ! zush_apply_cached_env "$tool"; then
+        if [[ $ignore_stable_env -eq 0 ]]; then
+            zush_do_tool_initialization "$tool" "$init_command" 1  # warn on no changes
+            return  # Tool is now initialized, no need for lazy placeholders
+        else
+            zush_debug "Skipping immediate initialization for $tool (--ignore-stable-env)"
+        fi
+    fi
 
     # Create placeholder functions for each command
     local cmd
@@ -50,86 +177,8 @@ zush_lazy_load() {
                 unfunction \"\$_cmd\" 2>/dev/null
             done
             
-            # Capture baseline environment
-            local _baseline_path=\$PATH
-            local _baseline_fpath=\$FPATH
-            local _baseline_env_file=\$(mktemp)
-            printenv | sort > \"\$_baseline_env_file\"
-            
-            # Initialize the tool
-            zush_debug '  Initializing $tool'
-            eval '$init_command'
-            
-            # Capture new environment and cache differences
-            local _new_env_file=\$(mktemp)
-            printenv | sort > \"\$_new_env_file\"
-            
-            # Cache environment changes
-            (
-                local cache_file=\"\${ZUSH_CACHE_DIR}/${tool}-env\"
-                
-                {
-                    echo '# Zush environment cache for $tool'
-                    echo \"# Generated: \$(date)\"
-                    echo
-                    
-                    # Process PATH additions
-                    if [[ \$PATH != \$_baseline_path ]]; then
-                        echo '# PATH additions:'
-                        local IFS=:
-                        local -a old_paths=(\${=_baseline_path})
-                        local -a new_paths=(\${=PATH})
-                        
-                        for p in \"\${new_paths[@]}\"; do
-                            local found=0
-                            for op in \"\${old_paths[@]}\"; do
-                                [[ \$p == \$op ]] && { found=1; break; }
-                            done
-                            if [[ \$found -eq 0 ]]; then
-                                # Use printf to properly escape the path
-                                printf 'path=(%q \$path)\n' \"\$p\"
-                            fi
-                        done
-                        echo
-                    fi
-                    
-                    # Process FPATH additions
-                    if [[ \$FPATH != \$_baseline_fpath ]]; then
-                        echo '# FPATH additions:'
-                        local IFS=:
-                        local -a old_fpaths=(\${=_baseline_fpath})
-                        local -a new_fpaths=(\${=FPATH})
-                        
-                        for f in \"\${new_fpaths[@]}\"; do
-                            local found=0
-                            for of in \"\${old_fpaths[@]}\"; do
-                                [[ \$f == \$of ]] && { found=1; break; }
-                            done
-                            if [[ \$found -eq 0 ]]; then
-                                # Use printf to properly escape the fpath
-                                printf 'fpath=(%q \$fpath)\n' \"\$f\"
-                            fi
-                        done
-                        echo
-                    fi
-                    
-                    # Process new environment variables
-                    echo '# Environment variables:'
-                    comm -13 \"\$_baseline_env_file\" \"\$_new_env_file\" | while IFS= read -r line; do
-                        [[ \$line =~ ^([^=]+)=(.*)$ ]] || continue
-                        local var=\${match[1]}
-                        local value=\${match[2]}
-                        
-                        # Skip PATH/FPATH (handled above) and empty vars
-                        [[ \$var == PATH || \$var == FPATH || -z \$var ]] && continue
-                        
-                        printf 'export %s=%q\n' \"\$var\" \"\$value\"
-                    done
-                } > \"\$cache_file\"
-                
-                zush_debug \"Environment cached to \$cache_file\"
-                rm -f \"\$_baseline_env_file\" \"\$_new_env_file\"
-            ) &!
+            # Initialize the tool using shared logic
+            zush_do_tool_initialization '$tool' '$init_command' ${ignore_stable_env:-1}
             
             # Execute the original command with all arguments
             \"\$0\" \"\$@\"
