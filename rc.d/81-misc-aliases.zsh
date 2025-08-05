@@ -1,0 +1,6 @@
+_='sudo'
+md='mkdir -p'
+rm='trash-put'
+g='git'
+opr='op run --no-masking --env-file .env -- '
+kssh='kitten ssh'
