@@ -17,6 +17,8 @@ setopt hist_find_no_dups       # don't display previously found duplicates in se
 setopt hist_save_no_dups       # don't write duplicate entries to history file
 setopt hist_reduce_blanks      # remove superfluous blanks before recording
 
+alias history="history 0"
+
 # Hishtory integration (optional - only loads if available)
 # Note: paths should be customized for your setup
 if [[ -f "$HOME/.hishtory/config.zsh" ]]; then
