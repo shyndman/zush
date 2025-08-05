@@ -5,7 +5,7 @@ q() {
     return 1
   fi
   llm --model=anthropic/claude-sonnet-4-0 $@ | glow
-  echo -e "\n\033[1;37mContinue conversation with: llm chat --continue\033[0m"
+  echo -e "\nContinue conversation with: \033[1;37mllm chat --continue\033[0m"
 }
 
 # Provide a ctrl+\ shortcut that attempts to generate your shell command
