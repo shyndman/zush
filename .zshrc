@@ -72,5 +72,12 @@ if (( ${+functions[zush_handoff_to_real_prompt]} )); then
     zush_handoff_to_real_prompt
 fi
 
+# Check for available updates and prompt, or start background check if needed
+if (( ${+functions[zush_prompt_available_update]} )); then
+    zush_prompt_available_update
+elif (( ${+functions[zush_start_update_check]} )); then
+    zush_start_update_check
+fi
+
 # Clean up (core functions stay available)
 # unset -f # nothing to clean up currently
