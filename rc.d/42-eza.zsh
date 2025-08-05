@@ -25,7 +25,7 @@ _EZA_BASE=(
     --hyperlink
     --color-scale=size
     --color-scale-mode=gradient
-    --icons=auto
+    --icons=never
     --group-directories-first
 )
 
