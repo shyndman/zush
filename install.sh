@@ -96,11 +96,27 @@ handle_existing_installation() {
 backup_zshenv() {
     if [[ -f "$ZSHENV_FILE" ]]; then
         local backup_file="${ZSHENV_FILE}.old"
-        log_info "Backing up existing .zshenv to .zshenv.old"
+        
+        log_warning "Existing .zshenv file detected: $ZSHENV_FILE"
+        echo "   Zush requires replacing your .zshenv to set ZDOTDIR=~/.config/zush"
+        echo "   Your current .zshenv will be renamed to: ${YELLOW}.zshenv.old${NC}"
+        echo ""
+        echo -n "   Proceed with renaming your .zshenv? [y/N] "
+        read -r response
+        case "$response" in
+            [yY][eE][sS]|[yY])
+                log_info "Backing up existing .zshenv to .zshenv.old"
+                ;;
+            *)
+                log_error "Cannot install Zush without replacing .zshenv"
+                echo "   Installation cancelled."
+                exit 1
+                ;;
+        esac
 
         if [[ -f "$backup_file" ]]; then
             log_warning "Backup file already exists: $backup_file"
-            echo -n "   Overwrite existing backup? [y/N] "
+            echo -n "   Overwrite existing .zshenv.old backup? [y/N] "
             read -r response
             case "$response" in
                 [yY][eE][sS]|[yY]) ;;
@@ -112,7 +128,7 @@ backup_zshenv() {
         fi
 
         cp "$ZSHENV_FILE" "$backup_file"
-        log_success "Backed up .zshenv"
+        log_success "Backed up .zshenv to .zshenv.old"
     fi
 }
 
