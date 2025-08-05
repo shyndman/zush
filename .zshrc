@@ -2,6 +2,10 @@
 # Zush - High-Performance ZSH Configuration
 # Main orchestrator that loads libraries and sources rc.d scripts
 
+# Capture start time for timing debug logs
+# Start timing for startup measurement
+typeset -g ZUSH_START_TIME=$(date +%s%3N)
+
 # Configuration - ZDOTDIR should be set to ~/.config/zush
 typeset -g ZUSH_HOME="$ZDOTDIR"
 typeset -g ZUSH_LIB_DIR="${ZUSH_HOME}/lib"
@@ -26,13 +30,13 @@ if [[ -d "${ZUSH_LIB_DIR}" ]]; then
         local lib_file="${ZUSH_LIB_DIR}/${lib}.zsh"
         [[ -f "$lib_file" ]] && source "$lib_file"
     done
-    
+
     # Load profiler only if profiling is enabled
     if [[ "${ZUSH_PROFILE:-0}" == "1" ]]; then
         local profiler_file="${ZUSH_LIB_DIR}/profiler.zsh"
         [[ -f "$profiler_file" ]] && source "$profiler_file"
     fi
-    
+
     # Load any other libraries not in the priority list
     for lib_file in "${ZUSH_LIB_DIR}"/*.zsh(N); do
         local basename="${lib_file:t:r}"
