@@ -2,3 +2,5 @@
 *.zwc
 .zhistory
 
+plugins/*
+!plugins/.gitkeep

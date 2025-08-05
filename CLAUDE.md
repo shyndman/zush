@@ -16,10 +16,15 @@ Zush is a modular, performance-focused zsh configuration system designed to achi
 │   ├── core.zsh         # foundational functions (zush_debug, zush_error, zush_source)
 │   ├── profiler.zsh     # performance measurement tools
 │   ├── compiler.zsh     # automatic zcompile functionality
-│   └── lazy-loader.zsh  # generic lazy loading with environment caching
+│   ├── lazy-loader.zsh  # generic lazy loading with environment caching
+│   └── plugin.zsh       # plugin management system (zushp commands)
+├── plugins/             # Third-party plugins
+│   ├── pure/            # Pure prompt theme
+│   └── zsh-autocomplete/ # Advanced autocompletion
 └── rc.d/                # Numbered configuration scripts
     ├── 00-profiling.zsh      # profiling setup
     ├── 10-lazy-tools.zsh     # nvm, pyenv, cargo, homebrew lazy loading
+    ├── 15-plugins.zsh        # plugin loading and deferred plugin management
     ├── 20-zsh-options.zsh    # core zsh behavioral options
     ├── 30-history.zsh        # comprehensive history management
     ├── 40-directory-nav.zsh  # directory navigation enhancements
@@ -28,6 +33,7 @@ Zush is a modular, performance-focused zsh configuration system designed to achi
     ├── 50-editor.zsh         # smart editor selection (local vs remote)
     ├── 60-better-reading.zsh # ov pager, bat, batman integration
     ├── 80-prompt.zsh         # starship prompt with custom config
+    ├── 98-shell-hooks.zsh    # shell environment integration (direnv)
     └── 99-profiling-end.zsh  # startup timing results
 ```
 
