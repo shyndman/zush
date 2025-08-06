@@ -107,3 +107,18 @@ zush_prompt_available_update() {
         echo ""
     fi
 }
+
+# Manual update check command
+update-zush() {
+    # Force an immediate update check regardless of interval
+    zush_debug "Running manual update check"
+    
+    # Perform the check (reusing background check logic)
+    if zush_background_update_check; then
+        # Check if update is available and prompt user
+        zush_prompt_available_update
+    else
+        echo "🦥 Failed to check for updates. Check your internet connection."
+        return 1
+    fi
+}
