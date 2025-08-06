@@ -78,7 +78,7 @@ handle_existing_installation() {
     if [[ -d "$ZUSH_DIR" ]]; then
         log_warning "Zush is already installed at $ZUSH_DIR"
         echo -n "   Remove existing installation and reinstall? [y/N] "
-        read -r response
+        read -r response </dev/tty 2>/dev/null || response=""
         case "$response" in
             [yY][eE][sS]|[yY])
                 log_info "Removing existing installation..."
@@ -102,7 +102,7 @@ backup_zshenv() {
         echo "   Your current .zshenv will be renamed to: ${YELLOW}.zshenv.old${NC}"
         echo ""
         echo -n "   Proceed with renaming your .zshenv? [y/N] "
-        read -r response
+        read -r response </dev/tty 2>/dev/null || response=""
         case "$response" in
             [yY][eE][sS]|[yY])
                 log_info "Backing up existing .zshenv to .zshenv.old"
@@ -117,7 +117,7 @@ backup_zshenv() {
         if [[ -f "$backup_file" ]]; then
             log_warning "Backup file already exists: $backup_file"
             echo -n "   Overwrite existing .zshenv.old backup? [y/N] "
-            read -r response
+            read -r response </dev/tty 2>/dev/null || response=""
             case "$response" in
                 [yY][eE][sS]|[yY]) ;;
                 *)
@@ -184,7 +184,7 @@ check_starship_config() {
     if [[ ! -f "$instant_config" ]]; then
         log_info "Creating instant starship configuration..."
         echo -n "   Create instant-starship.toml for faster prompts? [Y/n] "
-        read -r response
+        read -r response </dev/tty 2>/dev/null || response=""
         case "$response" in
             [nN][oO]|[nN])
                 log_info "Skipping instant starship config"
