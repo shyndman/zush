@@ -17,7 +17,15 @@ setopt hist_find_no_dups       # don't display previously found duplicates in se
 setopt hist_save_no_dups       # don't write duplicate entries to history file
 setopt hist_reduce_blanks      # remove superfluous blanks before recording
 
+# Simplify dumping the history a bit
 alias history="history 0"
+
+# Support prefix matching when using up and down arrows to navigate history
+autoload -Uz history-search-end
+zle -N history-beginning-search-backward-end history-search-end
+zle -N history-beginning-search-forward-end history-search-end
+bindkey "$terminfo[kcuu1]" history-beginning-search-backward-end
+bindkey "$terminfo[kcud1]" history-beginning-search-forward-end
 
 # Hishtory integration (optional - only loads if available)
 # Note: paths should be customized for your setup
