@@ -7,8 +7,9 @@ q() {
     echo "Usage: ask \"<prompt>\"" >&2
     return 1
   fi
+
   llm --model=anthropic/claude-sonnet-4-0 $@ | glow
-  echo -e "\nContinue conversation with: \033[1;37mllm chat --continue\033[0m"
+  echo -e "Continue conversation with: \033[1;37mllm chat --continue\033[0m"
 }
 
 # Provide a ctrl+\ shortcut that attempts to generate your shell command
