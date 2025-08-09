@@ -18,7 +18,3 @@ setopt magicequalsubst      # enable filename expansion for arguments of the for
 # Job control
 setopt auto_resume          # attempt to resume existing job before creating a new process
 setopt long_list_jobs       # list jobs in the long format by default
-
-# Completion behavior
-zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'  # case insensitive completion
-zstyle ':completion:*' menu select                         # use menu selection for completions
