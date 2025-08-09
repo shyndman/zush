@@ -23,7 +23,7 @@ __llm_cmdcomp() {
   fi
 
   # echo # Start the program on a blank line
-  local result=$(llm complete-command "$old_cmd")
+  local result=$(llm complete "$old_cmd")
   if [ $? -eq 0 ] && [ ! -z "$result" ]; then
     BUFFER=$result
   else
