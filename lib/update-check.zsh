@@ -115,8 +115,41 @@ update-zush() {
     
     # Perform the check (reusing background check logic)
     if zush_background_update_check; then
-        # Check if update is available and prompt user
-        zush_prompt_available_update
+        # Check if update is available and prompt user (ignoring debug/profile flags)
+        # Skip if not interactive
+        [[ ! -o interactive ]] && return
+        
+        # Check if update is available
+        if [[ -f "$ZUSH_UPDATE_AVAILABLE_FILE" ]]; then
+            echo ""
+            echo "🦥 Zush update available!"
+            echo -n "   Update now? [Y/n] "
+            read -r response
+
+            case "$response" in
+                [nN][oO]|[nN])
+                    echo "   Update postponed. You'll be reminded next time."
+                    ;;
+                *)
+                    echo "   Updating Zush..."
+                    local current_dir="$PWD"
+                    cd "$ZUSH_HOME" || return 1
+
+                    if git pull --quiet 2>/dev/null; then
+                        echo "   ✅ Zush updated successfully!"
+                        echo "   Restart your shell to use the latest version."
+                        # Remove update available file
+                        rm -f "$ZUSH_UPDATE_AVAILABLE_FILE"
+                    else
+                        echo "   ⚠️  Update failed. Try manually: cd ~/.config/zush && git pull"
+                    fi
+                    cd "$current_dir"
+                    ;;
+            esac
+            echo ""
+        else
+            echo "🦥 Zush is already up to date!"
+        fi
     else
         echo "🦥 Failed to check for updates. Check your internet connection."
         return 1
