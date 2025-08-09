@@ -12,7 +12,7 @@ zush_lazy_load brew 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' bre
 zush_lazy_load nvm 'source /home/linuxbrew/.linuxbrew/opt/nvm/nvm.sh' nvm node npm npx yarn pnpm
 
 # Python via pyenv
-zush_lazy_load pyenv 'eval "$(pyenv init -)"' pyenv python pip
+zush_lazy_load pyenv 'eval "$(pyenv init -)"' pyenv python pip uv uvx 
 
 # Rust via cargo
 zush_lazy_load cargo 'source ~/.cargo/env' cargo rustc rustup
