@@ -2,7 +2,7 @@
 # Sets up essential zsh options for better interactive behavior
 
 # Error handling and corrections
-setopt correct              # auto correct mistakes
+unsetopt correct              # auto correct mistakes
 setopt nonomatch            # hide error message if there is no match for the pattern
 
 # Interactive features
