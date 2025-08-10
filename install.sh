@@ -102,7 +102,7 @@ install_tools() {
     # Phase 4: Homebrew-based tools
     local brew_tools=(
         eza fzf fd ripgrep trash-cli glow imagemagick bat bat-extras
-        direnv ov
+        direnv ov btop git-delta
     )
     for tool in "${brew_tools[@]}"; do
         install_brew_tool "$tool"
