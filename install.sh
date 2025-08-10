@@ -102,7 +102,7 @@ install_tools() {
     # Phase 4: Homebrew-based tools
     local brew_tools=(
         eza fzf fd ripgrep trash-cli glow imagemagick bat bat-extras
-        direnv 1password-cli kitty ov
+        direnv ov
     )
     for tool in "${brew_tools[@]}"; do
         install_brew_tool "$tool"
@@ -146,7 +146,7 @@ install_nvm_and_node() {
     fi
     export NVM_DIR="$HOME/.nvm"
     [ -s "$(brew --prefix)/opt/nvm/nvm.sh" ] && \. "$(brew --prefix)/opt/nvm/nvm.sh"
-    
+
     if command -v nvm >/dev/null 2>&1 && ! nvm ls stable >/dev/null 2>&1; then
         if confirm_install "Node.js (stable)"; then
             log_info "Installing stable Node.js via nvm..."
@@ -221,7 +221,7 @@ install_pip_tools() {
 install_brew_tool() {
     local tool_name="$1"
     local command_name="${2:-$tool_name}"
-    
+
     if [[ "$tool_name" == "fd" ]]; then
         tool_name="fd-find"
     fi
