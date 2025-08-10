@@ -73,6 +73,168 @@ check_dependencies() {
     log_success "Dependencies checked"
 }
 
+# Utility function for interactive confirmation
+confirm_install() {
+    echo -n "   Install $1? [y/N] "
+    read -r response </dev/tty 2>/dev/null || response=""
+    case "$response" in
+        [yY][eE][sS]|[yY]) return 0 ;;
+        *) return 1 ;;
+    esac
+}
+
+install_tools() {
+    log_info "Checking for additional tool dependencies..."
+
+    # Phase 1: Core package manager (Homebrew)
+    install_brew
+
+    # Phase 2: Language Version Managers & Runtimes
+    install_pyenv_and_python
+    install_nvm_and_node
+    install_rustup_and_rust
+
+    # Phase 3: Language-dependent tools
+    install_hishtory
+    install_claude_cli
+    install_pip_tools
+
+    # Phase 4: Homebrew-based tools
+    local brew_tools=(
+        eza fzf fd ripgrep trash-cli glow imagemagick bat bat-extras
+        direnv 1password-cli kitty ov
+    )
+    for tool in "${brew_tools[@]}"; do
+        install_brew_tool "$tool"
+    done
+
+    log_success "Tool dependency check complete."
+}
+
+install_brew() {
+    if ! command -v brew >/dev/null 2>&1; then
+        log_warning "Homebrew is not installed."
+        if confirm_install "Homebrew"; then
+            log_info "Installing Homebrew..."
+            /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+            eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+            log_success "Homebrew installed."
+        else
+            log_error "Cannot proceed without Homebrew."
+            return 1
+        fi
+    fi
+}
+
+install_pyenv_and_python() {
+    if ! command -v pyenv >/dev/null 2>&1; then
+        install_brew_tool "pyenv"
+    fi
+    if command -v pyenv >/dev/null 2>&1 && ! pyenv versions --bare | grep -q "^3.12"; then
+        if confirm_install "Python 3.12"; then
+            log_info "Installing Python 3.12 via pyenv..."
+            pyenv install 3.12
+            pyenv global 3.12
+            log_success "Python 3.12 installed and set as global default."
+        fi
+    fi
+}
+
+install_nvm_and_node() {
+    if ! command -v nvm >/dev/null 2>&1; then
+        install_brew_tool "nvm"
+    fi
+    export NVM_DIR="$HOME/.nvm"
+    [ -s "$(brew --prefix)/opt/nvm/nvm.sh" ] && \. "$(brew --prefix)/opt/nvm/nvm.sh"
+    
+    if command -v nvm >/dev/null 2>&1 && ! nvm ls stable >/dev/null 2>&1; then
+        if confirm_install "Node.js (stable)"; then
+            log_info "Installing stable Node.js via nvm..."
+            nvm install stable
+            nvm alias default stable
+            log_success "Node.js stable installed and set as default."
+        fi
+    fi
+}
+
+install_rustup_and_rust() {
+    if ! command -v rustup >/dev/null 2>&1; then
+        install_brew_tool "rustup-init"
+        log_info "Running rustup-init. Please follow the prompts."
+        rustup-init -y --no-modify-path
+        source "$HOME/.cargo/env"
+    fi
+    if command -v rustup >/dev/null 2>&1 && ! rustup toolchain list | grep -q "stable"; then
+         if confirm_install "Rust (stable toolchain)"; then
+            log_info "Installing stable Rust toolchain..."
+            rustup default stable
+            log_success "Rust stable toolchain installed."
+        fi
+    fi
+}
+
+install_hishtory() {
+    if ! command -v hishtory >/dev/null 2>&1; then
+        if confirm_install "hishtory"; then
+            log_info "Installing hishtory..."
+            echo -n "   Please enter your hishtory secret: "
+            read -r secret </dev/tty
+            if [[ -n "$secret" ]]; then
+                export HISHTORY_INSTALL_SECRET="$secret"
+                curl https://hishtory.dev/install.py | python3 -
+                hishtory init
+                log_success "hishtory installed."
+            else
+                log_error "Hishtory secret cannot be empty. Skipped installation."
+            fi
+        fi
+    fi
+}
+
+install_claude_cli() {
+    if ! npm list -g | grep -q "@anthropic-ai/claude-code"; then
+        if confirm_install "Claude Code CLI"; then
+            log_info "Installing @anthropic-ai/claude-code via npm..."
+            npm install -g @anthropic-ai/claude-code
+            log_success "Claude Code CLI installed."
+        fi
+    fi
+}
+
+install_pip_tools() {
+    if ! pip list | grep -q "^llm\s"; then
+        if confirm_install "llm CLI"; then
+            log_info "Installing llm via pip..."
+            pip install llm
+            log_success "llm installed."
+        fi
+    fi
+    if ! pip list | grep -q "^uv\s"; then
+        if confirm_install "uv (Python package manager)"; then
+            log_info "Installing uv via pip..."
+            pip install uv
+            log_success "uv installed."
+        fi
+    fi
+}
+
+install_brew_tool() {
+    local tool_name="$1"
+    local command_name="${2:-$tool_name}"
+    
+    if [[ "$tool_name" == "fd" ]]; then
+        tool_name="fd-find"
+    fi
+
+    if ! command -v "$command_name" >/dev/null 2>&1; then
+        if confirm_install "$tool_name"; then
+            log_info "Installing $tool_name via Homebrew..."
+            brew install "$tool_name"
+            log_success "$tool_name installed."
+        fi
+    fi
+}
+
 # Handle existing installation
 handle_existing_installation() {
     if [[ -d "$ZUSH_DIR" ]]; then
@@ -300,6 +462,7 @@ main() {
 
     check_shell
     check_dependencies
+    install_tools
     handle_existing_installation
     backup_zshenv
     clone_repository
