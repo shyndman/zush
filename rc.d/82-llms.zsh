@@ -1,6 +1,22 @@
 # Claude Coded
 alias claude="/home/shyndman/.claude/local/claude"
 
+# Gemini CLI
+export GEMINI_SYSTEM_MD=~/.gemini/prompts/core.md
+
+gemini-mode() {
+  local mode="${1:-core}"
+  local prompt_file="$HOME/.gemini/prompts/${mode}.md"
+  
+  if [ -f "$prompt_file" ]; then
+    export GEMINI_SYSTEM_MD="$prompt_file"
+    echo "Gemini mode set to: $mode"
+  else
+    echo "Error: Prompt file not found: $prompt_file" >&2
+    return 1
+  fi
+}
+
 # Queries an LLM, displaying the result with glow
 q() {
   if [ -z "$1" ]; then

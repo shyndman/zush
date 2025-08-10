@@ -1,0 +1,9 @@
+#compdef gemini-mode
+
+_gemini_mode() {
+  local -a modes
+  modes=(core planner implementor)
+  _describe 'gemini modes' modes
+}
+
+_gemini_mode "$@"
