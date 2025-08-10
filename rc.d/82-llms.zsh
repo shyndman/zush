@@ -29,6 +29,7 @@ gemini-mode() {
     return 1
   fi
 }
+alias gemm=gemini-mode
 
 # Queries an LLM, displaying the result with glow
 q() {
