@@ -98,6 +98,7 @@ install_tools() {
     install_hishtory
     install_claude_cli
     install_pip_tools
+    install_llm_plugins
 
     # Phase 4: Homebrew-based tools
     local brew_tools=(
@@ -216,6 +217,32 @@ install_pip_tools() {
             log_success "uv installed."
         fi
     fi
+}
+
+install_llm_plugins() {
+    if ! command -v llm >/dev/null 2>&1; then
+        return
+    fi
+
+    log_info "Checking for llm plugins..."
+
+    local llm_plugins=(
+        "llm-anthropic"
+        "llm-gemini"
+        "https://github.com/shyndman/llm-complete-command.git"
+    )
+
+    for plugin in "${llm_plugins[@]}"; do
+        local plugin_name
+        plugin_name=$(basename "$plugin" .git)
+        if ! llm plugins | grep -q "$plugin_name"; then
+            if confirm_install "llm plugin: $plugin_name"; then
+                log_info "Installing $plugin_name via llm..."
+                llm install -U "$plugin"
+                log_success "$plugin_name installed."
+            fi
+        fi
+    done
 }
 
 install_brew_tool() {
