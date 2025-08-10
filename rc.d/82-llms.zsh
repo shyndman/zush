@@ -2,13 +2,26 @@
 alias claude="/home/shyndman/.claude/local/claude"
 
 # Gemini CLI
-export GEMINI_SYSTEM_MD=~/.gemini/prompts/core.md
+export GEMINI_MODE=core
+export GEMINI_SYSTEM_MD="~/.gemini/prompts/$GEMINI_MODE.md"
 
 gemini-mode() {
-  local mode="${1:-core}"
+  if [ -z "$1" ]; then
+    # No argument - show current mode
+    if [ -n "$GEMINI_SYSTEM_MD" ]; then
+      local current_mode=$(basename "$GEMINI_SYSTEM_MD" .md)
+      echo "Current Gemini mode: $current_mode"
+    else
+      echo "No Gemini mode set"
+    fi
+    return
+  fi
+  
+  local mode="$1"
   local prompt_file="$HOME/.gemini/prompts/${mode}.md"
   
   if [ -f "$prompt_file" ]; then
+    export GEMINI_MODE="$mode"
     export GEMINI_SYSTEM_MD="$prompt_file"
     echo "Gemini mode set to: $mode"
   else
