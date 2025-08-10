@@ -161,9 +161,11 @@ install_nvm_and_node() {
 install_rustup_and_rust() {
     if ! command -v rustup >/dev/null 2>&1; then
         install_brew_tool "rustup-init"
-        log_info "Running rustup-init. Please follow the prompts."
-        rustup-init -y --no-modify-path
-        source "$HOME/.cargo/env"
+        if command -v rustup-init >/dev/null 2>&1; then
+            log_info "Running rustup-init. Please follow the prompts."
+            rustup-init -y --no-modify-path
+            source "$HOME/.cargo/env"
+        fi
     fi
     if command -v rustup >/dev/null 2>&1 && ! rustup toolchain list | grep -q "stable"; then
          if confirm_install "Rust (stable toolchain)"; then
