@@ -1,4 +1,6 @@
 alias _='sudo'
+alias %='whence -p'
+
 alias md='mkdir -p'
 alias rm='trash-put'
 alias g='git'
