@@ -131,11 +131,18 @@ install_pyenv_and_python() {
     if ! command -v pyenv >/dev/null 2>&1; then
         install_brew_tool "pyenv"
     fi
+    
+    # Initialize pyenv in the current shell if available
+    if command -v pyenv >/dev/null 2>&1; then
+        eval "$(pyenv init -)"
+    fi
+    
     if command -v pyenv >/dev/null 2>&1 && ! pyenv versions --bare | grep -q "^3.12"; then
         if confirm_install "Python 3.12"; then
             log_info "Installing Python 3.12 via pyenv..."
             pyenv install 3.12
             pyenv global 3.12
+            pyenv shell 3.12
             log_success "Python 3.12 installed and set as global default."
         fi
     fi
