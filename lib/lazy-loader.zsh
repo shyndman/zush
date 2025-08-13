@@ -177,8 +177,8 @@ zush_lazy_load() {
                 unfunction \"\$_cmd\" 2>/dev/null
             done
             
-            # Initialize the tool using shared logic
-            zush_do_tool_initialization '$tool' '$init_command' ${ignore_stable_env:-1}
+            # Load the tool's real definition by executing its init command
+            eval '$init_command'
             
             # Execute the original command with all arguments
             \"\$0\" \"\$@\"
