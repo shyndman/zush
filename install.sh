@@ -102,7 +102,7 @@ install_tools() {
 
     # Phase 4: Homebrew-based tools
     local brew_tools=(
-        eza fd ripgrep trash-cli glow imagemagick bat bat-extras
+        eza fd ripgrep trash-cli imagemagick bat bat-extras
         direnv ov btop git-delta starship
     )
     for tool in "${brew_tools[@]}"; do
@@ -111,6 +111,9 @@ install_tools() {
     
     # Special handling for fzf (may need build-from-source on arm64)
     install_fzf
+    
+    # Special handling for glow (may need build-from-source on arm64)
+    install_glow
 
     log_success "Tool dependency check complete."
 }
@@ -285,6 +288,37 @@ install_fzf() {
     fi
     
     log_error "Failed to install fzf even from source."
+    return 1
+}
+
+install_glow() {
+    # Early return if already installed
+    if command -v glow >/dev/null 2>&1; then
+        return 0
+    fi
+    
+    # Early return if user declines
+    if ! confirm_install "glow"; then
+        return 0
+    fi
+    
+    log_info "Installing glow via Homebrew..."
+    
+    # Try normal install first, return early if successful
+    if brew install glow 2>/dev/null; then
+        log_success "glow installed."
+        return 0
+    fi
+    
+    # Fallback to build-from-source
+    log_warning "Standard glow installation failed (likely no bottle for arm64)."
+    log_info "Attempting to build glow from source (this may take a few minutes)..."
+    if brew install --build-from-source glow; then
+        log_success "glow installed from source."
+        return 0
+    fi
+    
+    log_error "Failed to install glow even from source."
     return 1
 }
 
