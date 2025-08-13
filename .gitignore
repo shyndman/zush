@@ -2,5 +2,10 @@
 *.zwc
 .zhistory
 
+.crush/
+GEMINI.md
+CLAUDE.md
+CRUSH.md
+
 plugins/*
 !plugins/.gitkeep
