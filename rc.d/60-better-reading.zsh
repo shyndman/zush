@@ -9,7 +9,7 @@ fi
 # Ov as primary pager
 export PAGER="ov"
 
-# Configure bat to use ov as its pager  
+# Configure bat to use ov as its pager
 export BAT_PAGER="ov --quit-if-one-screen --header 3"
 
 # Batman for enhanced man pages
@@ -17,8 +17,13 @@ eval "$(batman --export-env)"
 
 # Bat-extras aliases
 alias bg='batgrep'
-alias bd='batdiff' 
+alias bd='batdiff'
 alias bw='batwatch'
 
-# Replace cat with bat  
+# Replace cat with bat
 alias cat='bat'
+
+# Used for rendering Mermaid charts
+mermaid() {
+    npx -p @mermaid-js/mermaid-cli mmdc
+}
