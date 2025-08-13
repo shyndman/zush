@@ -251,23 +251,34 @@ install_llm_plugins() {
 }
 
 install_fzf() {
-    if ! command -v fzf >/dev/null 2>&1; then
-        if confirm_install "fzf"; then
-            log_info "Installing fzf via Homebrew..."
-            if brew install fzf 2>/dev/null; then
-                log_success "fzf installed."
-            else
-                log_warning "Standard fzf installation failed (likely no bottle for arm64)."
-                log_info "Attempting to build fzf from source (this may take a few minutes)..."
-                if brew install --build-from-source fzf; then
-                    log_success "fzf installed from source."
-                else
-                    log_error "Failed to install fzf even from source."
-                    return 1
-                fi
-            fi
-        fi
+    # Early return if already installed
+    if command -v fzf >/dev/null 2>&1; then
+        return 0
     fi
+    
+    # Early return if user declines
+    if ! confirm_install "fzf"; then
+        return 0
+    fi
+    
+    log_info "Installing fzf via Homebrew..."
+    
+    # Try normal install first, return early if successful
+    if brew install fzf 2>/dev/null; then
+        log_success "fzf installed."
+        return 0
+    fi
+    
+    # Fallback to build-from-source
+    log_warning "Standard fzf installation failed (likely no bottle for arm64)."
+    log_info "Attempting to build fzf from source (this may take a few minutes)..."
+    if brew install --build-from-source fzf; then
+        log_success "fzf installed from source."
+        return 0
+    fi
+    
+    log_error "Failed to install fzf even from source."
+    return 1
 }
 
 install_brew_tool() {
