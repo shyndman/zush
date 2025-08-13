@@ -292,10 +292,6 @@ install_brew_tool() {
     local tool_name="$1"
     local command_name="${2:-$tool_name}"
 
-    if [[ "$tool_name" == "fd" ]]; then
-        tool_name="fd-find"
-    fi
-
     if ! command -v "$command_name" >/dev/null 2>&1; then
         if confirm_install "$tool_name"; then
             log_info "Installing $tool_name via Homebrew..."
