@@ -68,12 +68,15 @@ install_tools() {
 
     # Phase 4: Homebrew-based tools
     local brew_tools=(
-        eza fzf fd ripgrep trash-cli glow imagemagick bat bat-extras
+        eza fd ripgrep trash-cli glow imagemagick bat bat-extras
         direnv 1password-cli kitty ov
     )
     for tool in "${brew_tools[@]}"; do
         install_brew_tool "$tool"
     done
+    
+    # Special handling for fzf (may need build-from-source on arm64)
+    install_fzf
 
     log_success "Tool dependency check complete."
 }
@@ -210,6 +213,30 @@ install_pip_tools() {
 }
 ```
 
+#### Special Case: fzf Installation
+
+```bash
+install_fzf() {
+    if ! command -v fzf >/dev/null 2>&1; then
+        if confirm_install "fzf"; then
+            log_info "Installing fzf via Homebrew..."
+            if brew install fzf 2>/dev/null; then
+                log_success "fzf installed."
+            else
+                log_warning "Standard fzf installation failed (likely no bottle for arm64)."
+                log_info "Attempting to build fzf from source (this may take a few minutes)..."
+                if brew install --build-from-source fzf; then
+                    log_success "fzf installed from source."
+                else
+                    log_error "Failed to install fzf even from source."
+                    return 1
+                fi
+            fi
+        fi
+    fi
+}
+```
+
 ### 4. Generic Homebrew Tool Installer
 
 This single function will handle the installation of any tool from the `brew_tools` array.
@@ -259,10 +286,10 @@ install_brew_tool() {
 | **uv** | `pip install` | `10-lazy-tools.zsh` | Requires Python/pip. |
 
 ### Phase 4: General Tools (via Homebrew)
-| Tool | Installation Method | `rc.d` File Reference |
-| :--- | :--- | :--- |
+| Tool | Installation Method | `rc.d` File Reference | Notes |
+| :--- | :--- | :--- | :--- |
 | **eza** | Homebrew | `42-eza.zsh` |
-| **fzf** | Homebrew | `81-fzf.zsh` |
+| **fzf** | Special handling | `81-fzf.zsh` | Tries normal brew install, falls back to `--build-from-source` on arm64 |
 | **fd** | Homebrew (`fd-find`) | `81-fzf.zsh` |
 | **ripgrep** | Homebrew | `81-fzf.zsh` |
 | **trash-cli** | Homebrew | `80-misc-aliases.zsh` |
