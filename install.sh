@@ -231,7 +231,7 @@ install_llm_plugins() {
     local llm_plugins=(
         "llm-anthropic"
         "llm-gemini"
-        "https://github.com/shyndman/llm-complete-command.git"
+        "git+https://github.com/shyndman/llm-complete-command.git"
     )
 
     for plugin in "${llm_plugins[@]}"; do
