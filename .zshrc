@@ -55,6 +55,9 @@ if [[ -d "${ZUSH_LIB_DIR}" ]]; then
     done
 fi
 
+# Load compinit before the rcs
+autoload -Uz compinit
+
 # Source all rc.d scripts in numerical order
 if [[ -d "${ZUSH_RC_DIR}" ]]; then
     for script in "${ZUSH_RC_DIR}"/*.zsh(N); do
