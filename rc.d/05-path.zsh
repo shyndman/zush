@@ -1,4 +1,3 @@
 # Add some standard paths to path
 
-path+="$HOME/.local/bin"
-path+="$HOME/bin"
+path=("$HOME/.local/bin" "$HOME/bin" $path)
