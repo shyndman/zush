@@ -73,6 +73,9 @@ zushc_all() {
     # Compile all rc.d files
     zushc "${ZUSH_RC_DIR}"
     
+    # Compile machine-specific config if it exists
+    [[ -f "${HOME}/.zushrc" ]] && zushc "${HOME}/.zushrc"
+    
     # Compile completion dump if it exists
     local zcompdump="${ZUSH_HOME}/.zcompdump"
     [[ -f "$zcompdump" ]] && zushc "$zcompdump"
@@ -100,6 +103,9 @@ zushc_clean() {
         rm -f "$compiled"
     done
     unsetopt null_glob
+    
+    # Clean machine-specific config
+    [[ -f "${HOME}/.zushrc.zwc" ]] && rm -f "${HOME}/.zushrc.zwc"
     
     # Clean completion dump
     [[ -f "${ZUSH_HOME}/.zcompdump.zwc" ]] && rm -f "${ZUSH_HOME}/.zcompdump.zwc"

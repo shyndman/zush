@@ -65,6 +65,9 @@ if [[ -d "${ZUSH_RC_DIR}" ]]; then
     done
 fi
 
+# Load machine-specific Zush configuration
+[[ -f "${HOME}/.zushrc" ]] && zush_source "${HOME}/.zushrc"
+
 # Auto-compile all configuration files in the background
 if (( ${+functions[zushc_bg]} )); then
     zushc_bg

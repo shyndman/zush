@@ -505,6 +505,64 @@ EOF
     fi
 }
 
+# Offer to create machine-specific config
+create_zushrc() {
+    log_info "Setting up machine-specific configuration..."
+    
+    local zushrc_file="$HOME/.zushrc"
+    
+    echo ""
+    echo "${BLUE}About ~/.zushrc:${NC}"
+    echo "  • Machine-specific configuration file for Zush"
+    echo "  • Perfect for aliases, paths, and settings unique to this machine"
+    echo "  • Loads after all main configs, so it can override anything"
+    echo "  • Automatically compiled for performance"
+    echo "  • Stays out of version control"
+    echo ""
+    
+    if [[ -f "$zushrc_file" ]]; then
+        log_info "~/.zushrc already exists, skipping creation"
+        return
+    fi
+    
+    echo -n "   Create ~/.zushrc with example configurations? [Y/n] "
+    read -r response </dev/tty 2>/dev/null || response=""
+    case "$response" in
+        [nN][oO]|[nN])
+            log_info "Skipping ~/.zushrc creation"
+            echo "   You can create it later with machine-specific configurations"
+            ;;
+        *)
+            log_info "Creating ~/.zushrc with examples..."
+            cat > "$zushrc_file" << 'EOF'
+# ~/.zushrc - Machine-specific Zush configuration
+# This file is loaded after all main rc.d scripts, so it can override anything
+
+# Example: Machine-specific aliases
+# alias work='cd ~/work-projects'
+# alias personal='cd ~/personal-projects'
+
+# Example: Local development paths
+# export ANDROID_HOME=/usr/local/android-sdk
+# export PATH="$PATH:$ANDROID_HOME/tools"
+
+# Example: Override prompt for this machine
+# export STARSHIP_CONFIG=~/.config/starship-work.toml
+
+# Example: Machine-specific functions
+# work_vpn() {
+#     sudo wg-quick up work
+# }
+
+# Add your machine-specific configurations here...
+EOF
+            chmod 644 "$zushrc_file"
+            log_success "Created ~/.zushrc with example configurations"
+            echo "   Edit ~/.zushrc to add your machine-specific settings"
+            ;;
+    esac
+}
+
 # Show success message
 show_success() {
     echo ""
@@ -523,6 +581,7 @@ show_success() {
     echo "Configuration:"
     echo "  ${BLUE}~/.config/zush/${NC}       - Main configuration"
     echo "  ${BLUE}~/.config/zush/rc.d/${NC}  - Modular configs"
+    echo "  ${BLUE}~/.zushrc${NC}             - Machine-specific settings"
     echo ""
     if [[ -f "${ZSHENV_FILE}.old" ]]; then
         echo "Your old .zshenv was backed up to: ${YELLOW}${ZSHENV_FILE}.old${NC}"
@@ -568,6 +627,7 @@ main() {
     clone_repository
     install_zshenv
     check_starship_config
+    create_zushrc
     show_success
 }
 

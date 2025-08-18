@@ -139,6 +139,40 @@ curl -fsSL https://raw.githubusercontent.com/shyndman/zush/main/install.sh | zsh
 2. Customize rc.d scripts as needed
 3. Install plugins with `zushp user/repo`
 
+### Machine-Specific Configuration
+
+**`~/.zushrc` - Local Machine Customization**
+
+For machine-specific configurations that shouldn't be in the main Zush repo, create a `~/.zushrc` file:
+
+```bash
+# ~/.zushrc - Machine-specific Zush configuration
+# This file is loaded after all main rc.d scripts, so it can override anything
+
+# Machine-specific aliases
+alias work='cd ~/work-projects'
+alias personal='cd ~/personal-projects'
+
+# Local development paths
+export ANDROID_HOME=/usr/local/android-sdk
+export PATH="$PATH:$ANDROID_HOME/tools"
+
+# Override prompt for this machine
+export STARSHIP_CONFIG=~/.config/starship-work.toml
+
+# Machine-specific functions
+work_vpn() {
+    sudo openvpn /etc/openvpn/work.conf
+}
+```
+
+**Benefits:**
+- Loads after main configurations (can override settings)
+- Automatically compiled for performance (like all Zush files)
+- Perfect for machine-specific paths, aliases, and environment variables
+- Stays out of version control
+- Follows standard `.*rc` naming convention
+
 ### Commands
 ```bash
 # Plugin Management
