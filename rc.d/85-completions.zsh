@@ -19,6 +19,12 @@ if [[ -d "$ZUSH_COMPLETIONS_DIR" ]]; then
     zush_debug "Added completions directory to FPATH: $ZUSH_COMPLETIONS_DIR"
 fi
 
+# Add user site-functions directory to FPATH
+if [[ -d ~/.local/share/zsh/site-functions ]]; then
+    fpath=(~/.local/share/zsh/site-functions $fpath)
+    zush_debug "Added user site-functions to FPATH: ~/.local/share/zsh/site-functions"
+fi
+
 # Initialize completion system if not already done
 if [[ -z "${_comps_loaded:-}" ]]; then
     # Load completions
