@@ -25,21 +25,13 @@ if [[ -d ~/.local/share/zsh/site-functions ]]; then
     zush_debug "Added user site-functions to FPATH: ~/.local/share/zsh/site-functions"
 fi
 
-# Initialize completion system if not already done
-if [[ -z "${_comps_loaded:-}" ]]; then
-    # Load completions
-    autoload -Uz compinit
-
-    # Use cached .zcompdump if it's fresh (less than 24 hours old)
-    local zcompdump="${ZUSH_CACHE_DIR}/.zcompdump"
-    if [[ -f "$zcompdump" && "$zcompdump" -nt "$zcompdump"(mh+24) ]]; then
-        compinit -C -d "$zcompdump"
-        zush_debug "Used cached completions"
-    else
-        compinit -d "$zcompdump"
-        zush_debug "Rebuilt completion cache"
-    fi
-
-    # Mark as loaded
-    typeset -g _comps_loaded=1
+# Completion system is initialized early in .zshrc
+# Just set up caching optimization here
+local zcompdump="${ZUSH_CACHE_DIR}/.zcompdump"
+if [[ -f "$zcompdump" && "$zcompdump" -nt "$zcompdump"(mh+24) ]]; then
+    zush_debug "Completion cache is fresh"
+else
+    # Rebuild cache in background to avoid blocking startup
+    (compinit -d "$zcompdump" &)
+    zush_debug "Rebuilding completion cache in background"
 fi

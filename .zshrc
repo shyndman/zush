@@ -55,8 +55,9 @@ if [[ -d "${ZUSH_LIB_DIR}" ]]; then
     done
 fi
 
-# Load compinit before the rcs
+# Initialize completion system early so compdef is available
 autoload -Uz compinit
+compinit -u
 
 # Source all rc.d scripts in numerical order
 if [[ -d "${ZUSH_RC_DIR}" ]]; then
