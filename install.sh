@@ -103,7 +103,7 @@ install_tools() {
     # Phase 4: Homebrew-based tools
     local brew_tools=(
         eza fd ripgrep trash-cli imagemagick bat bat-extras
-        direnv ov btop git-delta starship
+        ov btop git-delta starship
     )
     for tool in "${brew_tools[@]}"; do
         install_brew_tool "$tool"
@@ -114,6 +114,9 @@ install_tools() {
     
     # Special handling for glow (may need build-from-source on arm64)
     install_glow
+    
+    # Special handling for direnv (may need build-from-source on arm64)
+    install_direnv
 
     log_success "Tool dependency check complete."
 }
@@ -319,6 +322,37 @@ install_glow() {
     fi
     
     log_error "Failed to install glow even from source."
+    return 1
+}
+
+install_direnv() {
+    # Early return if already installed
+    if command -v direnv >/dev/null 2>&1; then
+        return 0
+    fi
+    
+    # Early return if user declines
+    if ! confirm_install "direnv"; then
+        return 0
+    fi
+    
+    log_info "Installing direnv via Homebrew..."
+    
+    # Try normal install first, return early if successful
+    if brew install direnv 2>/dev/null; then
+        log_success "direnv installed."
+        return 0
+    fi
+    
+    # Fallback to build-from-source
+    log_warning "Standard direnv installation failed (likely no bottle for arm64)."
+    log_info "Attempting to build direnv from source (this may take a few minutes)..."
+    if brew install --build-from-source direnv; then
+        log_success "direnv installed from source."
+        return 0
+    fi
+    
+    log_error "Failed to install direnv even from source."
     return 1
 }
 
