@@ -16,10 +16,10 @@ gemini-mode() {
     fi
     return
   fi
-  
+
   local mode="$1"
   local prompt_file="$HOME/.gemini/prompts/${mode}.md"
-  
+
   if [ -f "$prompt_file" ]; then
     export GEMINI_MODE="$mode"
     export GEMINI_SYSTEM_MD="$prompt_file"
@@ -38,7 +38,7 @@ q() {
     return 1
   fi
 
-  llm --model=anthropic/claude-sonnet-4-0 $@ | glow
+  llm --model=anthropic/claude-sonnet-4-0 -o web_search 1 $@ | glow
   echo -e "Continue conversation with: \033[1;37mllm chat --continue\033[0m"
 }
 

@@ -117,6 +117,9 @@ install_tools() {
     
     # Special handling for direnv (may need build-from-source on arm64)
     install_direnv
+    
+    # Special handling for neovim (may need build-from-source on arm64)
+    install_neovim
 
     log_success "Tool dependency check complete."
 }
@@ -245,8 +248,8 @@ install_llm_plugins() {
     log_info "Checking for llm plugins..."
 
     local llm_plugins=(
-        "llm-anthropic"
         "llm-gemini"
+        "git+https://github.com/shyndman/llm-anthropic.git"
         "git+https://github.com/shyndman/llm-complete-command.git"
     )
 
@@ -353,6 +356,37 @@ install_direnv() {
     fi
     
     log_error "Failed to install direnv even from source."
+    return 1
+}
+
+install_neovim() {
+    # Early return if already installed
+    if command -v nvim >/dev/null 2>&1; then
+        return 0
+    fi
+    
+    # Early return if user declines
+    if ! confirm_install "neovim"; then
+        return 0
+    fi
+    
+    log_info "Installing neovim via Homebrew..."
+    
+    # Try normal install first, return early if successful
+    if brew install neovim 2>/dev/null; then
+        log_success "neovim installed."
+        return 0
+    fi
+    
+    # Fallback to build-from-source
+    log_warning "Standard neovim installation failed (likely no bottle for arm64)."
+    log_info "Attempting to build neovim from source (this may take a few minutes)..."
+    if brew install --build-from-source neovim; then
+        log_success "neovim installed from source."
+        return 0
+    fi
+    
+    log_error "Failed to install neovim even from source."
     return 1
 }
 
