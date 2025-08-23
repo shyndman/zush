@@ -37,6 +37,7 @@ Zush is a modular, performance-aware zsh configuration system designed to achiev
     ├── 42-eza.zsh            # modern ls replacement with theme
     ├── 50-editor.zsh         # smart editor selection (local vs remote)
     ├── 60-better-reading.zsh # ov pager, bat, batman integration
+    ├── 70-ffmpeg.zsh         # ffmpeg utilities with smart stereo downmix
     ├── 80-prompt.zsh         # starship prompt with custom config
     ├── 85-completions.zsh    # completion system setup
     ├── 98-shell-hooks.zsh    # shell environment integration (direnv)
