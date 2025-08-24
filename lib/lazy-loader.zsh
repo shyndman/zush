@@ -200,3 +200,17 @@ zush_lazy_status() {
         fi
     done
 }
+
+# Show environment diff for a cached tool
+zush_lazy_diff() {
+    local tool=$1
+    [[ -n $tool ]] || { echo "Usage: zush_lazy_diff <tool>"; return 1; }
+
+    local cache_file="${ZUSH_CACHE_DIR}/${tool}-env"
+    [[ -f $cache_file ]] || { echo "No cached environment for $tool"; return 1; }
+
+    echo "Environment diff for $tool:"
+    echo "Cache file: $cache_file"
+    echo
+    cat "$cache_file"
+}
