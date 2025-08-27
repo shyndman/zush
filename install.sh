@@ -1,703 +1,117 @@
 #!/usr/bin/env zsh
-# Zush Installation Script
-# Mid-Performance ZSH Configuration
-#
-# Usage: curl -fsSL https://raw.githubusercontent.com/user/zush/main/install.sh | zsh
+# Zush TUI Installer Bootstrap
+# Usage: curl -fsSL https://raw.githubusercontent.com/shyndman/zush/main/install.sh | zsh
 
-set -e  # Exit on any error
+set -e
 
-# Colors for output
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
+# Colors for output  
 BLUE='\033[0;34m'
-NC='\033[0m' # No Color
+GREEN='\033[0;32m'
+RED='\033[0;31m'
+NC='\033[0m'
 
-# Configuration
-ZUSH_REPO="https://github.com/shyndman/zush.git"
-ZUSH_DIR="$HOME/.config/zush"
-ZSHENV_FILE="$HOME/.zshenv"
-STARSHIP_DIR="$HOME/.config/starship"
-
-# Utility functions
 log_info() { echo -e "${BLUE}ℹ${NC} $*"; }
 log_success() { echo -e "${GREEN}✓${NC} $*"; }
-log_warning() { echo -e "${YELLOW}⚠${NC} $*"; }
 log_error() { echo -e "${RED}✗${NC} $*"; }
 
-# Shell detection with insults
-check_shell() {
-    if [[ -n "$BASH_VERSION" ]] || [[ "$0" =~ bash$ ]]; then
-        log_error "You moron! This is a ZSH configuration installer."
-        echo "   Run it properly: ${YELLOW}curl -fsSL <url> | zsh${NC}"
-        exit 1
-    fi
-
-    if [[ -n "$SH_VERSION" ]] || [[ "$0" =~ /sh$ ]]; then
-        log_error "You moron! This is a ZSH configuration installer."
-        echo "   Run it properly: ${YELLOW}curl -fsSL <url> | zsh${NC}"
-        exit 1
-    fi
-
-    # Check if we're actually running in zsh
-    if [[ -z "$ZSH_VERSION" ]]; then
-        log_error "This script must be run with zsh!"
-        echo "   Try: ${YELLOW}curl -fsSL <url> | zsh${NC}"
-        exit 1
-    fi
-}
-
-# Check dependencies
-check_dependencies() {
-    log_info "Checking dependencies..."
-
+# Check what's missing and ask for confirmation
+check_and_confirm_deps() {
+    local missing=()
+    
     if ! command -v git >/dev/null 2>&1; then
         log_error "git is required but not installed."
-        echo "   Install git first, then try again."
         exit 1
     fi
-
-    if ! command -v zsh >/dev/null 2>&1; then
-        log_error "zsh is required but not installed."
-        echo "   Install zsh first, then try again."
-        exit 1
-    fi
-
-    if ! command -v starship >/dev/null 2>&1; then
-        log_warning "starship is not installed."
-        echo "   Zush will work without it, but instant prompts require starship."
-        echo "   Install from: https://starship.rs/"
-        echo ""
-    fi
-
-    log_success "Dependencies checked"
-}
-
-# Utility function for interactive confirmation
-confirm_install() {
-    echo -n "   Install $1? [y/N] "
-    read -r response </dev/tty 2>/dev/null || response=""
-    case "$response" in
-        [yY][eE][sS]|[yY]) return 0 ;;
-        *) return 1 ;;
-    esac
-}
-
-install_tools() {
-    log_info "Checking for additional tool dependencies..."
-
-    # Phase 1: Core package manager (Homebrew)
-    install_brew
-
-    # Phase 2: Language Version Managers & Runtimes
-    install_pyenv_and_python
-    install_nvm_and_node
-    install_rustup_and_rust
-
-    # Phase 3: Language-dependent tools
-    install_hishtory
-    install_claude_cli
-    install_pip_tools
-    install_llm_plugins
-
-    # Phase 4: Homebrew-based tools
-    local brew_tools=(
-        eza fd ripgrep trash-cli imagemagick bat bat-extras
-        btop git-delta starship procs
-    )
-    for tool in "${brew_tools[@]}"; do
-        install_brew_tool "$tool"
-    done
     
-    # Special handling for fzf (may need build-from-source on arm64)
-    install_fzf
-    
-    # Special handling for glow (may need build-from-source on arm64)
-    install_glow
-    
-    # Special handling for direnv (may need build-from-source on arm64)
-    install_direnv
-    
-    # Special handling for neovim (may need build-from-source on arm64)
-    install_neovim
-
-    log_success "Tool dependency check complete."
-}
-
-install_brew() {
     if ! command -v brew >/dev/null 2>&1; then
-        log_warning "Homebrew is not installed."
-        if confirm_install "Homebrew"; then
-            log_info "Installing Homebrew..."
-            /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-            eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-            log_success "Homebrew installed."
-        else
-            log_error "Cannot proceed without Homebrew."
-            return 1
-        fi
-    fi
-}
-
-install_pyenv_and_python() {
-    if ! command -v pyenv >/dev/null 2>&1; then
-        install_brew_tool "pyenv"
+        missing+=("Homebrew")
     fi
     
-    # Initialize pyenv in the current shell if available
-    if command -v pyenv >/dev/null 2>&1; then
-        eval "$(pyenv init -)"
+    if ! command -v uv >/dev/null 2>&1; then
+        missing+=("uv package manager")
     fi
     
-    if command -v pyenv >/dev/null 2>&1 && ! pyenv versions --bare | grep -q "^3.12"; then
-        if confirm_install "Python 3.12"; then
-            log_info "Installing Python 3.12 via pyenv..."
-            pyenv install 3.12
-            pyenv global 3.12
-            pyenv shell 3.12
-            log_success "Python 3.12 installed and set as global default."
-        fi
-    fi
-}
-
-install_nvm_and_node() {
-    if ! command -v nvm >/dev/null 2>&1; then
-        install_brew_tool "nvm"
-    fi
-    export NVM_DIR="$HOME/.nvm"
-    [ -s "$(brew --prefix)/opt/nvm/nvm.sh" ] && \. "$(brew --prefix)/opt/nvm/nvm.sh"
-
-    if command -v nvm >/dev/null 2>&1 && ! nvm ls stable >/dev/null 2>&1; then
-        if confirm_install "Node.js (stable)"; then
-            log_info "Installing stable Node.js via nvm..."
-            nvm install stable
-            nvm alias default stable
-            log_success "Node.js stable installed and set as default."
-        fi
-    fi
-}
-
-install_rustup_and_rust() {
-    if ! command -v rustup >/dev/null 2>&1; then
-        install_brew_tool "rustup-init"
-        if command -v rustup-init >/dev/null 2>&1; then
-            log_info "Running rustup-init. Please follow the prompts."
-            rustup-init -y --no-modify-path
-            source "$HOME/.cargo/env"
-        fi
-    fi
-    if command -v rustup >/dev/null 2>&1 && ! rustup toolchain list | grep -q "stable"; then
-         if confirm_install "Rust (stable toolchain)"; then
-            log_info "Installing stable Rust toolchain..."
-            rustup default stable
-            log_success "Rust stable toolchain installed."
-        fi
-    fi
-}
-
-install_hishtory() {
-    if ! command -v hishtory >/dev/null 2>&1; then
-        if confirm_install "hishtory"; then
-            log_info "Installing hishtory..."
-            echo -n "   Please enter your hishtory secret: "
-            read -r secret </dev/tty
-            if [[ -n "$secret" ]]; then
-                export HISHTORY_INSTALL_SECRET="$secret"
-                curl https://hishtory.dev/install.py | python3 -
-                hishtory init
-                log_success "hishtory installed."
+    if [[ ${#missing[@]} -gt 0 ]]; then
+        echo ""
+        printf "The installer requires "
+        for i in "${!missing[@]}"; do
+            if [[ $i -eq 0 ]]; then
+                printf "%s" "${missing[$i]}"
+            elif [[ $i -eq $((${#missing[@]} - 1)) ]] && [[ ${#missing[@]} -gt 1 ]]; then
+                printf ", and %s" "${missing[$i]}"
             else
-                log_error "Hishtory secret cannot be empty. Skipped installation."
+                printf ", %s" "${missing[$i]}"
             fi
+        done
+        printf ". Can we install those for you now? [y/N] "
+        
+        read -r response
+        if [[ ! "$response" =~ ^[Yy]$ ]]; then
+            log_error "Installation cancelled."
+            exit 1
         fi
-    fi
-}
-
-install_claude_cli() {
-    if ! npm list -g | grep -q "@anthropic-ai/claude-code"; then
-        if confirm_install "Claude Code CLI"; then
-            log_info "Installing @anthropic-ai/claude-code via npm..."
-            npm install -g @anthropic-ai/claude-code
-            log_success "Claude Code CLI installed."
-        fi
-    fi
-}
-
-install_pip_tools() {
-    if ! pip list | grep -q "^llm\s"; then
-        if confirm_install "llm CLI"; then
-            log_info "Installing llm via pip..."
-            pip install llm
-            log_success "llm installed."
-        fi
-    fi
-    if ! pip list | grep -q "^uv\s"; then
-        if confirm_install "uv (Python package manager)"; then
-            log_info "Installing uv via pip..."
-            pip install uv
-            log_success "uv installed."
-        fi
-    fi
-}
-
-install_llm_plugins() {
-    if ! command -v llm >/dev/null 2>&1; then
-        return
-    fi
-
-    log_info "Checking for llm plugins..."
-
-    local llm_plugins=(
-        "llm-gemini"
-        "git+https://github.com/shyndman/llm-anthropic.git"
-        "git+https://github.com/shyndman/llm-complete-command.git"
-    )
-
-    for plugin in "${llm_plugins[@]}"; do
-        local plugin_name
-        plugin_name=$(basename "$plugin" .git)
-        if ! llm plugins | grep -q "$plugin_name"; then
-            if confirm_install "llm plugin: $plugin_name"; then
-                log_info "Installing $plugin_name via llm..."
-                llm install -U "$plugin"
-                log_success "$plugin_name installed."
-            fi
-        fi
-    done
-}
-
-install_fzf() {
-    # Early return if already installed
-    if command -v fzf >/dev/null 2>&1; then
-        return 0
-    fi
-    
-    # Early return if user declines
-    if ! confirm_install "fzf"; then
-        return 0
-    fi
-    
-    log_info "Installing fzf via Homebrew..."
-    
-    # Try normal install first, return early if successful
-    if brew install fzf 2>/dev/null; then
-        log_success "fzf installed."
-        return 0
-    fi
-    
-    # Fallback to build-from-source
-    log_warning "Standard fzf installation failed (likely no bottle for arm64)."
-    log_info "Attempting to build fzf from source (this may take a few minutes)..."
-    if brew install --build-from-source fzf; then
-        log_success "fzf installed from source."
-        return 0
-    fi
-    
-    log_error "Failed to install fzf even from source."
-    return 1
-}
-
-install_glow() {
-    # Early return if already installed
-    if command -v glow >/dev/null 2>&1; then
-        return 0
-    fi
-    
-    # Early return if user declines
-    if ! confirm_install "glow"; then
-        return 0
-    fi
-    
-    log_info "Installing glow via Homebrew..."
-    
-    # Try normal install first, return early if successful
-    if brew install glow 2>/dev/null; then
-        log_success "glow installed."
-        return 0
-    fi
-    
-    # Fallback to build-from-source
-    log_warning "Standard glow installation failed (likely no bottle for arm64)."
-    log_info "Attempting to build glow from source (this may take a few minutes)..."
-    if brew install --build-from-source glow; then
-        log_success "glow installed from source."
-        return 0
-    fi
-    
-    log_error "Failed to install glow even from source."
-    return 1
-}
-
-install_direnv() {
-    # Early return if already installed
-    if command -v direnv >/dev/null 2>&1; then
-        return 0
-    fi
-    
-    # Early return if user declines
-    if ! confirm_install "direnv"; then
-        return 0
-    fi
-    
-    log_info "Installing direnv via Homebrew..."
-    
-    # Try normal install first, return early if successful
-    if brew install direnv 2>/dev/null; then
-        log_success "direnv installed."
-        return 0
-    fi
-    
-    # Fallback to build-from-source
-    log_warning "Standard direnv installation failed (likely no bottle for arm64)."
-    log_info "Attempting to build direnv from source (this may take a few minutes)..."
-    if brew install --build-from-source direnv; then
-        log_success "direnv installed from source."
-        return 0
-    fi
-    
-    log_error "Failed to install direnv even from source."
-    return 1
-}
-
-install_neovim() {
-    # Early return if already installed
-    if command -v nvim >/dev/null 2>&1; then
-        return 0
-    fi
-    
-    # Early return if user declines
-    if ! confirm_install "neovim"; then
-        return 0
-    fi
-    
-    log_info "Installing neovim via Homebrew..."
-    
-    # Try normal install first, return early if successful
-    if brew install neovim 2>/dev/null; then
-        log_success "neovim installed."
-        return 0
-    fi
-    
-    # Fallback to build-from-source
-    log_warning "Standard neovim installation failed (likely no bottle for arm64)."
-    log_info "Attempting to build neovim from source (this may take a few minutes)..."
-    if brew install --build-from-source neovim; then
-        log_success "neovim installed from source."
-        return 0
-    fi
-    
-    log_error "Failed to install neovim even from source."
-    return 1
-}
-
-install_brew_tool() {
-    local tool_name="$1"
-    local command_name="${2:-$tool_name}"
-
-    if ! command -v "$command_name" >/dev/null 2>&1; then
-        if confirm_install "$tool_name"; then
-            log_info "Installing $tool_name via Homebrew..."
-            brew install "$tool_name"
-            log_success "$tool_name installed."
-        fi
-    fi
-}
-
-# Handle existing installation
-handle_existing_installation() {
-    if [[ -d "$ZUSH_DIR" ]]; then
-        log_warning "Zush is already installed at $ZUSH_DIR"
-        echo -n "   Remove existing installation and reinstall? [y/N] "
-        read -r response </dev/tty 2>/dev/null || response=""
-        case "$response" in
-            [yY][eE][sS]|[yY])
-                log_info "Removing existing installation..."
-                rm -rf "$ZUSH_DIR"
-                ;;
-            *)
-                log_info "Installation cancelled."
-                exit 0
-                ;;
-        esac
-    fi
-}
-
-# Backup existing .zshenv
-backup_zshenv() {
-    if [[ -f "$ZSHENV_FILE" ]]; then
-        local backup_file="${ZSHENV_FILE}.old"
-
-        log_warning "Existing .zshenv file detected: $ZSHENV_FILE"
-        echo "   Zush requires replacing your .zshenv to set ZDOTDIR=~/.config/zush"
-        echo "   Your current .zshenv will be renamed to: ${YELLOW}.zshenv.old${NC}"
-        echo ""
-        echo -n "   Proceed with renaming your .zshenv? [y/N] "
-        read -r response </dev/tty 2>/dev/null || response=""
-        case "$response" in
-            [yY][eE][sS]|[yY])
-                log_info "Backing up existing .zshenv to .zshenv.old"
-                ;;
-            *)
-                log_error "Cannot install Zush without replacing .zshenv"
-                echo "   Installation cancelled."
-                exit 1
-                ;;
-        esac
-
-        if [[ -f "$backup_file" ]]; then
-            log_warning "Backup file already exists: $backup_file"
-            echo -n "   Overwrite existing .zshenv.old backup? [y/N] "
-            read -r response </dev/tty 2>/dev/null || response=""
-            case "$response" in
-                [yY][eE][sS]|[yY]) ;;
-                *)
-                    log_error "Cannot proceed without backing up .zshenv"
-                    exit 1
-                    ;;
-            esac
-        fi
-
-        cp "$ZSHENV_FILE" "$backup_file"
-        log_success "Backed up .zshenv to .zshenv.old"
-    fi
-}
-
-# Clone repository
-clone_repository() {
-    log_info "Cloning Zush repository..."
-
-    if ! git clone --depth=1 "$ZUSH_REPO" "$ZUSH_DIR" 2>/dev/null; then
-        log_error "Failed to clone repository"
-        echo "   Check your internet connection and try again."
-        exit 1
-    fi
-
-    log_success "Repository cloned to $ZUSH_DIR"
-}
-
-# Install .zshenv
-install_zshenv() {
-    log_info "Installing .zshenv..."
-
-    local source_zshenv="$ZUSH_DIR/home/.zshenv"
-    if [[ ! -f "$source_zshenv" ]]; then
-        log_error "Source .zshenv not found: $source_zshenv"
-        exit 1
-    fi
-
-    cp "$source_zshenv" "$ZSHENV_FILE"
-    chmod 644 "$ZSHENV_FILE"
-
-    log_success "Installed .zshenv"
-}
-
-# Check starship configuration
-check_starship_config() {
-    log_info "Checking starship configuration..."
-
-    if [[ ! -d "$STARSHIP_DIR" ]]; then
-        log_warning "Starship config directory not found: $STARSHIP_DIR"
-        echo "   Instant prompts will not work without starship configuration."
-        echo "   Set up starship first: https://starship.rs/config/"
-        return
-    fi
-
-    local starship_config="$STARSHIP_DIR/starship.toml"
-    if [[ ! -f "$starship_config" ]]; then
-        log_warning "Starship config not found: $starship_config"
-        echo "   Instant prompts will not work without starship configuration."
-        return
-    fi
-
-    # Create instant-starship.toml if it doesn't exist
-    local instant_config="$STARSHIP_DIR/instant-starship.toml"
-    if [[ ! -f "$instant_config" ]]; then
-        log_info "Creating instant starship configuration..."
-        echo -n "   Create instant-starship.toml for faster prompts? [Y/n] "
-        read -r response </dev/tty 2>/dev/null || response=""
-        case "$response" in
-            [nN][oO]|[nN])
-                log_info "Skipping instant starship config"
-                return
-                ;;
-            *)
-                # Copy existing config and append disable rules
-                cat "$starship_config" > "$instant_config"
-                cat >> "$instant_config" << 'EOF'
-
-# Disable slow modules for instant prompts
-[git_branch]
-disabled = true
-
-[git_status]
-disabled = true
-
-[git_state]
-disabled = true
-
-[git_metrics]
-disabled = true
-
-[git_commit]
-disabled = true
-
-[cmd_duration]
-disabled = true
-
-[package]
-disabled = true
-
-[docker_context]
-disabled = true
-
-[kubernetes]
-disabled = true
-
-[terraform]
-disabled = true
-
-[aws]
-disabled = true
-
-[gcloud]
-disabled = true
-
-[env_var]
-disabled = true
-EOF
-                log_success "Created instant starship configuration"
-                ;;
-        esac
-    else
-        log_info "Instant starship config already exists"
-    fi
-}
-
-# Offer to create machine-specific config
-create_zushrc() {
-    log_info "Setting up machine-specific configuration..."
-    
-    local zushrc_file="$HOME/.zushrc"
-    
-    echo ""
-    echo "${BLUE}About ~/.zushrc:${NC}"
-    echo "  • Machine-specific configuration file for Zush"
-    echo "  • Perfect for aliases, paths, and settings unique to this machine"
-    echo "  • Loads after all main configs, so it can override anything"
-    echo "  • Automatically compiled for performance"
-    echo "  • Stays out of version control"
-    echo ""
-    
-    if [[ -f "$zushrc_file" ]]; then
-        log_info "~/.zushrc already exists, skipping creation"
-        return
-    fi
-    
-    echo -n "   Create ~/.zushrc with example configurations? [Y/n] "
-    read -r response </dev/tty 2>/dev/null || response=""
-    case "$response" in
-        [nN][oO]|[nN])
-            log_info "Skipping ~/.zushrc creation"
-            echo "   You can create it later with machine-specific configurations"
-            ;;
-        *)
-            log_info "Creating ~/.zushrc with examples..."
-            cat > "$zushrc_file" << 'EOF'
-# ~/.zushrc - Machine-specific Zush configuration
-# This file is loaded after all main rc.d scripts, so it can override anything
-
-# Example: Machine-specific aliases
-# alias work='cd ~/work-projects'
-# alias personal='cd ~/personal-projects'
-
-# Example: Local development paths
-# export ANDROID_HOME=/usr/local/android-sdk
-# export PATH="$PATH:$ANDROID_HOME/tools"
-
-# Example: Override prompt for this machine
-# export STARSHIP_CONFIG=~/.config/starship-work.toml
-
-# Example: Machine-specific functions
-# work_vpn() {
-#     sudo wg-quick up work
-# }
-
-# Add your machine-specific configurations here...
-EOF
-            chmod 644 "$zushrc_file"
-            log_success "Created ~/.zushrc with example configurations"
-            echo "   Edit ~/.zushrc to add your machine-specific settings"
-            ;;
-    esac
-}
-
-# Show success message
-show_success() {
-    echo ""
-    log_success "Zush installed successfully! 🦥"
-    echo ""
-    echo "Next steps:"
-    echo "  1. ${YELLOW}Restart your shell${NC} or run: source ~/.zshenv"
-    echo "  2. ${YELLOW}Test startup time${NC}: ZUSH_PROFILE=1 zsh -c exit"
-    echo "  3. ${YELLOW}Install plugins${NC}: zushp user/repo"
-    echo ""
-    echo "Commands:"
-    echo "  ${BLUE}zushp <user/repo>${NC}     - Install plugin"
-    echo "  ${BLUE}zushp_update${NC}          - Update all plugins"
-    echo "  ${BLUE}zushc file.zsh${NC}        - Compile zsh file"
-    echo ""
-    echo "Configuration:"
-    echo "  ${BLUE}~/.config/zush/${NC}       - Main configuration"
-    echo "  ${BLUE}~/.config/zush/rc.d/${NC}  - Modular configs"
-    echo "  ${BLUE}~/.zushrc${NC}             - Machine-specific settings"
-    echo ""
-    if [[ -f "${ZSHENV_FILE}.old" ]]; then
-        echo "Your old .zshenv was backed up to: ${YELLOW}${ZSHENV_FILE}.old${NC}"
         echo ""
     fi
 }
 
-# Rollback on error
-rollback() {
-    log_error "Installation failed, rolling back..."
-
-    # Remove Zush directory
-    [[ -d "$ZUSH_DIR" ]] && rm -rf "$ZUSH_DIR"
-
-    # Restore .zshenv backup
-    if [[ -f "${ZSHENV_FILE}.old" ]]; then
-        mv "${ZSHENV_FILE}.old" "$ZSHENV_FILE"
-        log_info "Restored original .zshenv"
+# Install Homebrew if not present
+install_homebrew() {
+    if ! command -v brew >/dev/null 2>&1; then
+        log_info "Installing Homebrew..."
+        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+        eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+        log_success "Homebrew installed"
     fi
-
-    exit 1
 }
 
-# Main installation
+# Install Python3 via Homebrew
+install_python() {
+    if ! command -v python3 >/dev/null 2>&1; then
+        log_info "Installing Python3..."
+        brew install python3
+        log_success "Python3 installed"
+    fi
+}
+
+# Install uv package manager
+install_uv() {
+    if ! command -v uv >/dev/null 2>&1; then
+        log_info "Installing uv..."
+        brew install uv
+        log_success "uv installed"
+    fi
+}
+
+# Clone zush repository
+clone_zush() {
+    local zush_dir="$HOME/.config/zush"
+    if [[ -d "$zush_dir" ]]; then
+        log_info "Removing existing zush installation..."
+        rm -rf "$zush_dir"
+    fi
+    
+    log_info "Cloning zush repository..."
+    git clone --depth=1 "https://github.com/shyndman/zush.git" "$zush_dir"
+    log_success "Repository cloned to $zush_dir"
+}
+
+# Launch TUI installer
+launch_tui() {
+    log_info "Launching TUI installer..."
+    cd "$HOME/.config/zush"
+    uv run install_tui.py
+}
+
 main() {
-    # Set up error handling
-    trap rollback ERR
-
-    echo "${BLUE}"
-    echo "╔═════════════════════════════════════════╗"
-    echo "║            Zush Installer               ║"
-    echo "║     Mid-Performance 🦥 ZSH Config       ║"
-    echo "╚═════════════════════════════════════════╝"
-    echo "${NC}"
-
-    sleep 1
-
-    check_shell
-    check_dependencies
-    install_tools
-    handle_existing_installation
-    backup_zshenv
-    clone_repository
-    install_zshenv
-    check_starship_config
-    create_zushrc
-    show_success
+    echo -e "${BLUE}Zush Bootstrap Installer${NC}"
+    echo "Setting up environment..."
+    echo ""
+    
+    check_and_confirm_deps
+    install_homebrew  
+    install_uv
+    clone_zush
+    launch_tui
 }
 
-# Run main function
 main "$@"

@@ -1,0 +1,188 @@
+/* installer.tcss - Zush Installer Styling */
+
+/* App-wide styles */
+App {
+    background: $background;
+}
+
+/* Welcome screen */
+#welcome-container {
+    align: center middle;
+    width: 80%;
+    height: 80%;
+}
+
+#app-title {
+    text-align: center;
+    text-style: bold;
+    color: $primary;
+}
+
+#app-subtitle {
+    text-align: center;
+    color: $text-muted;
+    text-style: italic;
+}
+
+#welcome-text {
+    text-align: center;
+    color: $text;
+    width: 60;
+}
+
+/* Question screen styles */
+#question-container {
+    align: center middle;
+    width: 70%;
+    height: 70%;
+}
+
+#question-title {
+    text-align: center;
+    text-style: bold;
+    color: $success;
+    margin-bottom: 1;
+}
+
+#description {
+    text-align: center;
+    color: $text-muted;
+    margin-bottom: 2;
+    width: 50;
+    content-align: center middle;
+}
+
+#button-row {
+    align: center middle;
+    height: auto;
+}
+
+/* Summary screen styles */
+#summary-container {
+    align: center middle;
+    width: 80%;
+    height: 80%;
+}
+
+#summary-title {
+    text-align: center;
+    text-style: bold;
+    color: $primary;
+    margin-bottom: 1;
+}
+
+.tool-item {
+    color: $success;
+    margin-left: 2;
+    margin-bottom: 1;
+}
+
+#total-count {
+    text-align: center;
+    color: $text;
+    text-style: bold;
+}
+
+#no-tools {
+    text-align: center;
+    color: $warning;
+    text-style: italic;
+}
+
+/* Progress screen styles */
+#progress-container {
+    align: center middle;
+    width: 90%;
+    height: 90%;
+}
+
+#progress-title {
+    text-align: center;
+    text-style: bold;
+    color: $primary;
+}
+
+#current-status {
+    text-align: center;
+    color: $text;
+    text-style: bold;
+}
+
+#install-progress {
+    width: 80%;
+    margin: 1 0;
+}
+
+#progress-count {
+    text-align: center;
+    color: $text-muted;
+}
+
+#log-title {
+    color: $text;
+    text-style: bold;
+    margin-bottom: 1;
+}
+
+.log-area {
+    height: 10;
+    width: 80%;
+    background: $panel;
+    border: round $background;
+    scrollbar-size-vertical: 1;
+    padding: 1;
+    color: $text-muted;
+}
+
+/* Button styles */
+Button {
+    margin: 0 1;
+    min-width: 12;
+    height: 3;
+}
+
+Button.primary {
+    background: $primary;
+    color: $text;
+}
+
+Button.success {
+    background: $success;
+    color: $text;
+}
+
+Button.success:focus {
+    border-top: solid white;
+}
+
+Button.warning {
+    background: $warning;
+    color: $text;
+}
+
+Button.error {
+    background: $error;
+    color: $text;
+}
+
+Button:hover {
+    text-style: bold;
+}
+
+Button:focus {
+    text-style: bold;
+}
+
+Button:focus > .button--label {
+    background: transparent;
+}
+
+
+/* Utility classes */
+.spacer {
+    height: 1;
+}
+
+.center {
+    align: center middle;
+}
