@@ -14,8 +14,8 @@ alias bg='batgrep'
 alias bd='batdiff'
 alias bw='batwatch'
 
-# Replace cat with bat
-alias cat='bat'
+# Replace cat with bat (no line numbers by default)
+alias cat='bat --style=plain'
 
 # Used for rendering Mermaid charts
 mermaid() {
