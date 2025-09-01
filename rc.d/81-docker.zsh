@@ -1,5 +1,6 @@
 # Docker Compose shortcuts
 alias dc='docker compose'
+alias dcc='docker compose create'
 alias dcu='docker compose up'
 alias dcud='docker compose up -d'
 alias dcd='docker compose down'
