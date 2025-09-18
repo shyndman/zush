@@ -55,10 +55,6 @@ if [[ -d "${ZUSH_LIB_DIR}" ]]; then
     done
 fi
 
-# Initialize completion system early so compdef is available
-autoload -Uz compinit
-compinit -u
-
 # Source all rc.d scripts in numerical order
 if [[ -d "${ZUSH_RC_DIR}" ]]; then
     for script in "${ZUSH_RC_DIR}"/*.zsh(N); do
