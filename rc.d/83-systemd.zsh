@@ -11,9 +11,11 @@ alias uj='journalctl --user'
 # SystemD unit selector.
 _sysls() {
     # $1: --system or --user
-    # $2: states, see also "systemctl list-units --state=help"
+    # $2: filter to unit state, or omit to show all
+    #     See `systemctl list-units --state=help` for more info
     SCOPE=$1
-    [ -n $2 ] && STATE="--state=$2"
+    [ -n "$2" ] && STATE="--state=$2"
+    echo $HI
     cat \
         <(echo 'UNIT/FILE LOAD/STATE ACTIVE/PRESET SUB DESCRIPTION') \
         <(systemctl $SCOPE list-units --legend=false $STATE) \
@@ -51,14 +53,15 @@ _SYS_CMDS=(
 _sysexec() {
     for ((j=0; j < ${#_SYS_ALIASES[@]}; j++)); do
         if [ "$1" == "${_SYS_ALIASES[$j]}" ]; then
-            cmd=$(eval echo "${_SYS_CMDS[$j]}") # expand service name
-            wide=${cmd:0:1}
-            cmd="$cmd && ${wide} status \$_ || ${wide}j -xeu \$_"
-            eval $cmd
+            base_cmd=$(eval echo "${_SYS_CMDS[$j]}") # expand service name
+            scope=${base_cmd:0:1}
+            status_cmd="${scope} status \$_"
+            journal_cmd="${scope}j -xeu \$_"
+            full_cmd="$base_cmd && $status_cmd || $journal_cmd"
+            eval $full_cmd
 
             # Push to history.
-            [ -n "$BASH_VERSION" ] && history -s $cmd
-            [ -n "$ZSH_VERSION" ] && print -s $cmd
+            [ -n "$ZSH_VERSION" ] && print -s $full_cmd
             return
         fi
     done
