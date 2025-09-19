@@ -103,7 +103,7 @@ install_tools() {
     # Phase 4: Homebrew-based tools
     local brew_tools=(
         eza fd ripgrep trash-cli imagemagick bat bat-extras
-        btop git-delta starship procs
+        btop git-delta starship procs go-task
     )
     for tool in "${brew_tools[@]}"; do
         install_brew_tool "$tool"
