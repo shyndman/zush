@@ -1,5 +1,8 @@
-# Directory navigation configuration
-# Sets up enhanced directory navigation with smart stack management
+# Directory navigation configuration Sets up better mv and cp tools, enhanced
+# directory navigation with smart stack management
+
+# Load zmv and zcp for advanced file operations
+autoload -U zmv zcp
 
 # Directory navigation options
 setopt auto_cd              # change directories without typing `cd`
