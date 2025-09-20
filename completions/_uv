@@ -4547,8 +4547,26 @@ _uv__version_commands() {
     _describe -t commands 'uv version commands' commands "$@"
 }
 
-if [ "$funcstack[1]" = "_uv" ]; then
-    _uv "$@"
-else
-    compdef _uv uv
-fi
+#if [ "$funcstack[1]" = "_uv" ]; then
+#    _uv "$@"
+#else
+#    compdef _uv uv
+#fi
+
+# Add hacky wrapper completion that will complete uv run binaries and files
+_uv_run_mod() {
+    if [[ "$words[2]" == "run" && "$words[CURRENT]" != -* ]]; then
+        local venv_binaries
+        if [[ -d .venv/bin ]]; then
+            venv_binaries=( ${(@f)"$(_call_program files ls -1 .venv/bin 2>/dev/null)"} )
+        fi
+        
+        _alternative \
+            'files:filename:_files' \
+            "binaries:venv binary:(($venv_binaries))"
+    else
+        _uv "$@"
+    fi
+}
+compdef _uv_run_mod uv
+
