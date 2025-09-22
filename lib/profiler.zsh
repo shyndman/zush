@@ -4,7 +4,7 @@
 # zprof is loaded early in .zshrc if ZUSH_PROFILE=1
 
 # Profile a command or function
-zush_profile() {
+_zush_profile() {
     local name="$1"
     shift
     local start=$(date +%s%3N)
@@ -15,14 +15,14 @@ zush_profile() {
 }
 
 # Show startup timing
-zush_startup_time() {
+_zush_startup_time() {
     local end=$(date +%s%3N)
     local duration=$(( end - ZUSH_START_TIME ))
     printf "Zush startup: %.0fms\n" $(( duration ))
 }
 
 # Benchmark a command multiple times
-zush_bench() {
+_zush_bench() {
     local iterations="${1:-10}"
     local name="$2"
     shift 2
@@ -46,11 +46,11 @@ zush_bench() {
 }
 
 # Show zprof results if profiling was enabled
-zush_show_profile() {
+_zush_show_profile() {
     if [[ "${ZUSH_PROFILE:-0}" == "1" ]] && (( ${+functions[zprof]} )); then
         echo "\n=== ZPROF Results ==="
         zprof
         echo "=====================\n"
     fi
-    zush_startup_time
+    _zush_startup_time
 }

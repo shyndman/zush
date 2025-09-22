@@ -6,7 +6,7 @@
 typeset -g ZUSH_INSTANT_STARSHIP_CONFIG="${HOME}/.config/starship/instant-starship.toml"
 
 # Show instant prompt if conditions are met
-zush_show_instant_prompt() {
+_zush_show_instant_prompt() {
     # Skip instant prompt if debugging or profiling
     [[ "${ZUSH_PROFILE:-0}" == "1" || "${ZUSH_DEBUG:-0}" == "1" ]] && return
 
@@ -45,7 +45,7 @@ zush_show_instant_prompt() {
 }
 
 # Handle handoff from instant to real prompt
-zush_handoff_to_real_prompt() {
+_zush_handoff_to_real_prompt() {
     # Only do handoff if we showed an instant prompt
     [[ "${_ZUSH_INSTANT_PROMPT_SHOWN:-0}" != "1" ]] && return
 

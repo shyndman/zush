@@ -97,8 +97,8 @@ zushp() {
     zush_debug "Found plugin file: $plugin_file"
     
     # Compile plugin file
-    if (( ${+functions[zushc]} )); then
-        zushc "$plugin_file" 2>/dev/null || zush_debug "Compilation failed for $plugin_file"
+    if (( ${+functions[_zushc]} )); then
+        _zushc "$plugin_file" 2>/dev/null || zush_debug "Compilation failed for $plugin_file"
     fi
     
     # Add to manifest
@@ -106,7 +106,7 @@ zushp() {
     
     # Source plugin immediately
     zush_debug "Sourcing $plugin_name immediately"
-    zush_source "$plugin_file"
+    _zush_source "$plugin_file"
 }
 
 # Update plugins
@@ -125,7 +125,7 @@ zushp_update() {
             if (cd "$plugin_dir" && git pull --quiet 2>/dev/null); then
                 echo "  ✓ Updated $plugin_name"
                 # Recompile after update
-                (( ${+functions[zushc]} )) && zushc "$plugin_file" 2>/dev/null
+                (( ${+functions[_zushc]} )) && _zushc "$plugin_file" 2>/dev/null
             else
                 echo "  ✗ Failed to update $plugin_name"
             fi
@@ -136,7 +136,7 @@ zushp_update() {
 }
 
 # Clean all plugins
-zushp_clean() {
+_zushp_clean() {
     local confirm
     echo -n "Remove all plugins and cache? [y/N] "
     read -r confirm

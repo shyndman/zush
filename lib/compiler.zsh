@@ -2,12 +2,12 @@
 # Provides automatic zcompile functionality for faster loading
 
 # Smart compile function - handles files, directories, or patterns
-zushc() {
+_zushc() {
     local target="$1"
     local pattern="${2:-*.zsh}"
     
     if [[ -z "$target" ]]; then
-        zush_error "zushc: no target specified"
+        zush_error "_zushc: no target specified"
         return 1
     fi
     
@@ -18,7 +18,7 @@ zushc() {
         # Compile directory
         _zushc_dir "$target" "$pattern"
     else
-        zush_error "zushc: $target does not exist"
+        zush_error "_zushc: $target does not exist"
         return 1
     fi
 }
@@ -61,30 +61,30 @@ _zushc_dir() {
 }
 
 # Compile all Zush configuration files
-zushc_all() {
+_zushc_all() {
     zush_debug "Starting full compilation"
     
     # Compile main .zshrc
-    zushc "${ZUSH_HOME}/.zshrc"
+    _zushc "${ZUSH_HOME}/.zshrc"
     
     # Compile all library files
-    zushc "${ZUSH_LIB_DIR}"
+    _zushc "${ZUSH_LIB_DIR}"
     
     # Compile all rc.d files
-    zushc "${ZUSH_RC_DIR}"
+    _zushc "${ZUSH_RC_DIR}"
     
     # Compile machine-specific config if it exists
-    [[ -f "${HOME}/.zushrc" ]] && zushc "${HOME}/.zushrc"
+    [[ -f "${HOME}/.zushrc" ]] && _zushc "${HOME}/.zushrc"
     
     # Compile completion dump if it exists
     local zcompdump="${ZUSH_HOME}/.zcompdump"
-    [[ -f "$zcompdump" ]] && zushc "$zcompdump"
+    [[ -f "$zcompdump" ]] && _zushc "$zcompdump"
     
     zush_debug "Full compilation complete"
 }
 
 # Clean all compiled files
-zushc_clean() {
+_zushc_clean() {
     zush_debug "Cleaning compiled files"
     
     # Clean main .zshrc
@@ -114,10 +114,10 @@ zushc_clean() {
 }
 
 # Background compilation job that runs after startup
-zushc_bg() {
+_zushc_bg() {
     {
         zush_debug "Background compilation started"
-        zushc_all
+        _zushc_all
         zush_debug "Background compilation finished"
     } &!
 }

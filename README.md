@@ -23,7 +23,7 @@ curl -fsSL https://raw.githubusercontent.com/shyndman/zush/main/install.sh | zsh
 ```bash
 zushp user/repo     # Install plugin
 zushp_update        # Update all plugins
-zushc file.zsh      # Compile ZSH file
+zush_clean          # Clean all caches and plugins
 ```
 
 ## Performance

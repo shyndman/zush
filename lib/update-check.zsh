@@ -8,7 +8,7 @@ typeset -g ZUSH_UPDATE_CHECK_FILE="${ZUSH_CACHE_DIR}/last-update-check"
 typeset -g ZUSH_UPDATE_AVAILABLE_FILE="${ZUSH_CACHE_DIR}/update-available"
 
 # Check if we should run background update check
-zush_should_background_check() {
+_zush_should_background_check() {
     # Skip if disabled
     [[ "${ZUSH_UPDATE_CHECK_INTERVAL}" == "0" ]] && return 1
 
@@ -33,7 +33,7 @@ zush_should_background_check() {
 }
 
 # Background update check (runs in background process)
-zush_background_update_check() {
+_zush_background_update_check() {
     local current_time=$(date +%s)
     echo "$current_time" > "$ZUSH_UPDATE_CHECK_FILE"
 
@@ -62,15 +62,15 @@ zush_background_update_check() {
 }
 
 # Start background update check if needed
-zush_start_update_check() {
-    if zush_should_background_check; then
+_zush_start_update_check() {
+    if _zush_should_background_check; then
         zush_debug "Starting background update check"
-        (zush_background_update_check &) &!
+        (_zush_background_update_check &) &!
     fi
 }
 
 # Check if update is available and prompt user
-zush_prompt_available_update() {
+_zush_prompt_available_update() {
     # Skip if not interactive
     [[ ! -o interactive ]] && return
 
@@ -114,7 +114,7 @@ update-zush() {
     zush_debug "Running manual update check"
     
     # Perform the check (reusing background check logic)
-    if zush_background_update_check; then
+    if _zush_background_update_check; then
         # Check if update is available and prompt user (ignoring debug/profile flags)
         # Skip if not interactive
         [[ ! -o interactive ]] && return

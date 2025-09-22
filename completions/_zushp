@@ -1,4 +1,4 @@
-#compdef zushp zushp_update zushp_clean
+#compdef zushp zushp_update
 
 # Zush Plugin Manager Completions
 
@@ -15,9 +15,6 @@ _zushp() {
             _arguments \
                 '::plugin name:_zushp_installed_plugins' \
                 && return 0
-            ;;
-        zushp_clean)
-            # No arguments for clean
             ;;
     esac
 }

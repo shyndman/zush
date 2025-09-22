@@ -29,7 +29,7 @@ if [[ -f "${ZUSH_LIB_DIR}/instant-prompt.zsh" ]]; then
     # Load core functions first for zush_debug (but preserve ZUSH_START_TIME)
     [[ -f "${ZUSH_LIB_DIR}/core.zsh" ]] && source "${ZUSH_LIB_DIR}/core.zsh"
     source "${ZUSH_LIB_DIR}/instant-prompt.zsh"
-    zush_show_instant_prompt
+    _zush_show_instant_prompt
 fi
 
 
@@ -53,7 +53,7 @@ if [[ -d "${ZUSH_LIB_DIR}" ]]; then
         local basename="${lib_file:t:r}"
         case "$basename" in
             core|profiler|compiler|lazy-loader|utils) continue ;;
-            *) zush_source "$lib_file" ;;
+            *) _zush_source "$lib_file" ;;
         esac
     done
 fi
@@ -61,28 +61,28 @@ fi
 # Source all rc.d scripts in numerical order
 if [[ -d "${ZUSH_RC_DIR}" ]]; then
     for script in "${ZUSH_RC_DIR}"/*.zsh(N); do
-        zush_source "$script"
+        _zush_source "$script"
     done
 fi
 
 # Load machine-specific Zush configuration
-[[ -f "${HOME}/.zushrc" ]] && zush_source "${HOME}/.zushrc"
+[[ -f "${HOME}/.zushrc" ]] && _zush_source "${HOME}/.zushrc"
 
 # Auto-compile all configuration files in the background
-if (( ${+functions[zushc_bg]} )); then
-    zushc_bg
+if (( ${+functions[_zushc_bg]} )); then
+    _zushc_bg
 fi
 
 # Hand off instant prompt to real starship
-if (( ${+functions[zush_handoff_to_real_prompt]} )); then
-    zush_handoff_to_real_prompt
+if (( ${+functions[_zush_handoff_to_real_prompt]} )); then
+    _zush_handoff_to_real_prompt
 fi
 
 # Check for available updates and prompt, or start background check if needed
-if (( ${+functions[zush_prompt_available_update]} )); then
-    zush_prompt_available_update
-elif (( ${+functions[zush_start_update_check]} )); then
-    zush_start_update_check
+if (( ${+functions[_zush_prompt_available_update]} )); then
+    _zush_prompt_available_update
+elif (( ${+functions[_zush_start_update_check]} )); then
+    _zush_start_update_check
 fi
 
 # Clean up (core functions stay available)

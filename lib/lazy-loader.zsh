@@ -4,7 +4,7 @@
 # --- Environment Caching ---
 
 # Applies a tool's cached environment. Returns 1 if no cache exists.
-zush_apply_cached_env() {
+_zush_apply_cached_env() {
     local tool=$1
     local cache_file="${ZUSH_CACHE_DIR}/${tool}-env"
     [[ -f $cache_file ]] || { zush_debug "No cached environment for $tool"; return 1; }
@@ -13,7 +13,7 @@ zush_apply_cached_env() {
 }
 
 # Captures and caches environment changes after a tool is initialized.
-zush_do_tool_initialization() {
+_zush_do_tool_initialization() {
     local tool=$1
     local init_command=$2
     local warn_on_no_changes=${3:-1}
@@ -85,8 +85,8 @@ zush_lazy_load() {
     local -a commands=("$@")
 
     # If no cache exists, initialize immediately and create the cache.
-    if ! zush_apply_cached_env "$tool"; then
-        zush_do_tool_initialization "$tool" "$init_command" 1
+    if ! _zush_apply_cached_env "$tool"; then
+        _zush_do_tool_initialization "$tool" "$init_command" 1
         return
     fi
 
@@ -119,14 +119,14 @@ zush_lazy_eval() {
     local eval_cache_file="${eval_cache_dir}/${command_hash}"
 
     # If no environment cache exists, we need to create both caches now.
-    if ! zush_apply_cached_env "$tool"; then
+    if ! _zush_apply_cached_env "$tool"; then
         zush_debug "No environment cache for '$tool'. Generating all caches."
         if [[ ! -f "$eval_cache_file" ]]; then
             zush_debug "No eval cache for '$tool'. Executing command to create it."
             eval "$command_to_execute" > "$eval_cache_file"
         fi
         # Now that the eval cache exists, use it to initialize the environment
-        zush_do_tool_initialization "$tool" "eval \"\$(<'$eval_cache_file')\"" 1
+        _zush_do_tool_initialization "$tool" "eval \"\$(<'$eval_cache_file')\"" 1
         return
     fi
 
@@ -154,17 +154,17 @@ zush_lazy_eval() {
 
 # --- Cache Management ---
 
-zush_lazy_clear() {
+_zush_lazy_clear() {
     local tool=$1
     if [[ -n $tool ]]; then
         rm -f "${ZUSH_CACHE_DIR}/${tool}-env" && echo "Cleared cache for $tool"
     else
         rm -f "${ZUSH_CACHE_DIR}"/*-env(N) && echo "Cleared all lazy-load caches"
-        zush_eval_clear
+        _zush_eval_clear
     fi
 }
 
-zush_eval_clear() {
+_zush_eval_clear() {
     local eval_cache_dir="${ZUSH_CACHE_DIR}/eval"
     if [[ -d $eval_cache_dir ]]; then
         rm -rf "$eval_cache_dir"/* && echo "Cleared eval cache."
@@ -172,16 +172,16 @@ zush_eval_clear() {
 }
 
 # Refresh cache for a tool (clear and reinitialize on next use)
-zush_lazy_refresh() {
+_zush_lazy_refresh() {
     local tool=$1
-    [[ -n $tool ]] || { echo "Usage: zush_lazy_refresh <tool>"; return 1; }
+    [[ -n $tool ]] || { echo "Usage: _zush_lazy_refresh <tool>"; return 1; }
 
-    zush_lazy_clear "$tool"
+    _zush_lazy_clear "$tool"
     echo "Cache cleared for $tool. It will be regenerated on next use."
 }
 
 # Show status of lazy-loaded tools
-zush_lazy_status() {
+_zush_lazy_status() {
     local cache_file tool cache_date
     local -a cache_files=("${ZUSH_CACHE_DIR}"/*-env(N))
 
@@ -202,9 +202,9 @@ zush_lazy_status() {
 }
 
 # Show environment diff for a cached tool
-zush_lazy_diff() {
+_zush_lazy_diff() {
     local tool=$1
-    [[ -n $tool ]] || { echo "Usage: zush_lazy_diff <tool>"; return 1; }
+    [[ -n $tool ]] || { echo "Usage: _zush_lazy_diff <tool>"; return 1; }
 
     local cache_file="${ZUSH_CACHE_DIR}/${tool}-env"
     [[ -f $cache_file ]] || { echo "No cached environment for $tool"; return 1; }
