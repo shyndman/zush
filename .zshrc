@@ -2,6 +2,9 @@
 # Zush - High-Performance ZSH Configuration
 # Main orchestrator that loads libraries and sources rc.d scripts
 
+# Early exit if Zush is disabled
+[[ -n "${ZUSH_DISABLE}" ]] && return
+
 # Capture start time for timing debug logs
 # Start timing for startup measurement
 typeset -g ZUSH_START_TIME=$(date +%s%3N)
