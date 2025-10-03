@@ -1,6 +1,7 @@
 .zcompdump
 *.zwc
 .zhistory
+.cache
 
 .crush/
 GEMINI.md
