@@ -37,6 +37,14 @@ _zush_source() {
     fi
 }
 
+# Eval cache maintenance shared across modules
+_zush_eval_clear() {
+    local eval_cache_dir="${ZUSH_CACHE_DIR}/eval"
+    if [[ -d $eval_cache_dir ]]; then
+        rm -rf "$eval_cache_dir"/* && echo "Cleared eval cache."
+    fi
+}
+
 # Clean all Zush caches and data
 zush_clean() {
     local confirm
@@ -89,8 +97,12 @@ _zush_check_cache_invalidation() {
         local now=$(date +%s)
         if (( now - last_check > max_age )); then
             zush_debug "Eval cache is older than 7 days, clearing in background."
-            _zush_eval_clear &!
-            touch "$timestamp_file"
+            if (( ${+functions[_zush_eval_clear]} )); then
+                _zush_eval_clear &!
+                touch "$timestamp_file"
+            else
+                zush_debug "Eval cache clear function not yet loaded; skipping for now."
+            fi
         fi
     else
         touch "$timestamp_file"

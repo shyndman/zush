@@ -164,13 +164,6 @@ _zush_lazy_clear() {
     fi
 }
 
-_zush_eval_clear() {
-    local eval_cache_dir="${ZUSH_CACHE_DIR}/eval"
-    if [[ -d $eval_cache_dir ]]; then
-        rm -rf "$eval_cache_dir"/* && echo "Cleared eval cache."
-    fi
-}
-
 # Refresh cache for a tool (clear and reinitialize on next use)
 _zush_lazy_refresh() {
     local tool=$1
@@ -212,5 +205,10 @@ _zush_lazy_diff() {
     echo "Environment diff for $tool:"
     echo "Cache file: $cache_file"
     echo
-    cat "$cache_file"
+cat "$cache_file"
 }
+
+# Trigger eval cache maintenance once the lazy loader is available.
+if (( ${+functions[_zush_check_cache_invalidation]} )); then
+    _zush_check_cache_invalidation
+fi
