@@ -1,6 +1,3 @@
-# Claude Coded
-alias claude="/home/shyndman/.claude/local/claude"
-
 # Gemini CLI
 export GEMINI_MODE=core
 export GEMINI_SYSTEM_MD="~/.gemini/prompts/$GEMINI_MODE.md"
