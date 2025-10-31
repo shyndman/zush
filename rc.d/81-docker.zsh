@@ -1,11 +1,13 @@
 # Docker Compose shortcuts
 alias dc='docker compose'
 alias dcc='docker compose create'
+alias dcd='docker compose down'
+alias dcex='docker compose exec'
+alias dcp='docker compose pull'
+alias dcps='docker compose ps'
+alias dcr='docker compose restart'
 alias dcu='docker compose up'
 alias dcud='docker compose up -d'
-alias dcd='docker compose down'
-alias dcps='docker compose ps'
-alias dcex='docker compose exec'
 
 # Docker Compose logs variants
 alias dcl='docker compose logs'
