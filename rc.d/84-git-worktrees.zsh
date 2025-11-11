@@ -46,6 +46,17 @@ gwt() {
     shift
 
     local repo_root=$(_gwt_repo_root) || return 1
+
+    if [[ "$worktree_name" == "main" ]]; then
+        if (( $# )); then
+            _gwt_error "Extra arguments are not allowed when switching to an existing worktree"
+            return 1
+        fi
+        _gwt_message "Switching to existing worktree: main"
+        (( stay )) || _gwt_enter_worktree "$repo_root" || return 1
+        return 0
+    fi
+
     local worktrees_dir=$(_gwt_worktrees_dir "$repo_root") || return 1
     local target_path=$(_gwt_target_path "$worktrees_dir" "$worktree_name") || return 1
 
@@ -76,6 +87,9 @@ Creates or enters a git worktree located at <repo>/worktrees/<name>. When the
 worktree already exists, gwt simply switches to it. When it does not, gwt asks
 for confirmation (unless --yes is supplied) and then runs `git worktree add`,
 optionally using <base-ref>.
+
+Special cases:
+  main          Shortcut for switching to the primary worktree at the repo root.
 
 Options:
   --stay        Do not cd into the target worktree after completion.
