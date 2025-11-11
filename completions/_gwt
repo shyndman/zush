@@ -1,0 +1,48 @@
+#compdef gwt
+
+_gwt() {
+    emulate -L zsh
+    local ret=1
+    _arguments \
+        '(-h --help)'{-h,--help}'[Show help information]' \
+        '(-y --yes)'{-y,--yes}'[Automatically confirm creation of missing worktrees]' \
+        '--stay[Do not cd into the new worktree after creation]' \
+        '1:worktree name:_gwt_complete_worktree_names' \
+        '2:base ref:_gwt_complete_git_refs' \
+        '*:: :_gwt_complete_git_refs' && ret=0
+    return ret
+}
+
+_gwt_complete_worktree_names() {
+    local repo_root=$(_gwt_completion_repo_root) || return 1
+    local worktrees_dir="${repo_root}/worktrees"
+    setopt local_options null_glob
+    typeset -aU candidates
+    local entry
+
+    if [[ -d "$worktrees_dir" ]]; then
+        for entry in "$worktrees_dir"/*(/N); do
+            candidates+=("${entry:t}")
+        done
+    fi
+
+    while IFS= read -r entry; do
+        [[ -n "$entry" ]] && candidates+=("$entry")
+    done < <(git -C "$repo_root" for-each-ref --format='%(refname:short)' refs/heads 2>/dev/null)
+
+    (( ${#candidates[@]} )) || return 1
+    compadd -a candidates
+}
+
+_gwt_complete_git_refs() {
+    local repo_root=$(_gwt_completion_repo_root) || return 1
+    local entry
+    local refs
+    refs=($(git -C "$repo_root" for-each-ref --format='%(refname:short)' refs/heads refs/remotes 2>/dev/null))
+    (( ${#refs[@]} )) || return 1
+    compadd -a refs
+}
+
+_gwt_completion_repo_root() {
+    git rev-parse --show-toplevel 2>/dev/null
+}
