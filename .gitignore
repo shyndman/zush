@@ -10,3 +10,5 @@ CRUSH.md
 
 plugins/*
 !plugins/.gitkeep
+
+/worktrees
