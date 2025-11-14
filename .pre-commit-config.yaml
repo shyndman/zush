@@ -1,0 +1,46 @@
+repos:
+  - repo: https://github.com/koalaman/shellcheck-precommit
+    rev: v0.11.0
+    hooks:
+      - id: shellcheck
+        name: shellcheck (zsh configs)
+        args:
+          - --shell=bash
+          - --severity=error
+          - --exclude=SC1090,SC1091
+        files: >-
+          ^(home/\.zshenv|install\.sh|rc\.d/.*\.zsh|scripts/.*\.sh)$
+        exclude: >-
+          ^(plugins/|worktrees/)
+
+  - repo: https://github.com/scop/pre-commit-shfmt
+    rev: v3.12.0-2
+    hooks:
+      - id: shfmt
+        name: shfmt (shell scripts)
+        args:
+          - --diff
+          - --indent
+          - "4"
+        files: >-
+          ^(install\.sh|scripts/.*\.sh)$
+
+  - repo: local
+    hooks:
+      - id: zsh-syntax-check
+        name: zsh -n syntax check
+        entry: scripts/pre-commit-zsh-syntax.sh
+        language: script
+        files: >-
+          ^(home/\.zshenv|install\.sh|lib/.*\.zsh|rc\.d/.*\.zsh|scripts/.*\.sh|completions/.*)$
+        exclude: >-
+          ^(plugins/|worktrees/)
+
+      - id: zcompile-dry-run
+        name: zcompile dry run
+        entry: scripts/pre-commit-zcompile.sh
+        language: script
+        files: >-
+          ^(home/\.zshenv|lib/.*\.zsh|rc\.d/.*\.zsh)$
+        exclude: >-
+          ^(plugins/|worktrees/)

@@ -149,6 +149,16 @@ curl -fsSL https://raw.githubusercontent.com/shyndman/zush/main/install.sh | zsh
 2. Customize rc.d scripts as needed
 3. Install plugins with `zushp user/repo`
 
+### Development Workflow
+
+1. After every batch of edits, run `pre-commit` (no args) so staged files re-check before review.
+2. When sweeping lots of files or syncing after hook updates, follow up with `pre-commit run --all-files`.
+3. Hooks enforce:
+   - `shellcheck` across `home/.zshenv`, `install.sh`, `rc.d/**/*.zsh`, `scripts/**/*.sh`, and avoid vendor dirs.
+   - `shfmt --diff --indent 4 --simplify` on Bash-oriented scripts (`install.sh`, `scripts/*.sh`).
+   - `zsh -n` syntax validation for `.zsh/.sh` files and completions.
+   - A `zcompile` dry-run on `lib/*.zsh`, `rc.d/*.zsh`, and `home/.zshenv`.
+
 ### Machine-Specific Configuration
 
 **`~/.zushrc` - Local Machine Customization**

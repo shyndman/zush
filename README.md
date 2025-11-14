@@ -26,6 +26,20 @@ zushp_update        # Update all plugins
 zush_clean          # Clean all caches and plugins
 ```
 
+## Development
+
+### Pre-commit checks
+
+1. Install the tooling dependencies: `pre-commit`, `shellcheck`, and `shfmt` (Homebrew: `brew install pre-commit shellcheck shfmt`).
+2. Enable hooks locally with `pre-commit install`.
+3. Run everything once before sending a PR: `pre-commit run --all-files`.
+
+Hooks currently enforce:
+- `shellcheck` (with Zsh-friendly flags) on rc.d scripts, `home/.zshenv`, `install.sh`, and any shell helpers under `scripts/`.
+- `shfmt --diff` on Bash-compatible scripts (`install.sh`, `scripts/*.sh`).
+- `zsh -n` syntax validation across `.zsh/.sh` sources plus completions.
+- A `zcompile` dry run on `lib/*.zsh`, `rc.d/*.zsh`, and `home/.zshenv` to ensure everything remains compilable.
+
 ## Performance
 
 Current startup time: ~129ms with instant prompts providing immediate visual feedback.
