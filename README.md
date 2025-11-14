@@ -1,5 +1,7 @@
 # Zush 🦥 - Mid-Performance ZSH Configuration
 
+[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/shyndman/zush/main.svg)](https://results.pre-commit.ci/latest/github/shyndman/zush/main)
+
 My personal ZSH configuration framework.
 
 A performance-aware ZSH configuration designed for sub-200ms startup times while maintaining full functionality.
