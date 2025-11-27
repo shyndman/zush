@@ -1,6 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+tmpdir=""
+
+cleanup() {
+    local dir=${tmpdir-}
+    [[ -n "$dir" ]] && rm -rf "$dir"
+}
+
 main() {
     local root
     root=$(git rev-parse --show-toplevel)
@@ -15,9 +22,8 @@ main() {
         done < <(git ls-files -z)
     fi
 
-    local tmpdir
     tmpdir=$(mktemp -d)
-    trap 'rm -rf "$tmpdir"' EXIT
+    trap cleanup EXIT
 
     local status=0
     local index=0
@@ -32,7 +38,7 @@ main() {
                 echo "zcompile failed: $path" >&2
                 status=1
             fi
-            ((index++))
+            ((index += 1))
             ;;
         esac
     done
