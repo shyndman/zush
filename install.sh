@@ -4,7 +4,7 @@
 #
 # Usage: curl -fsSL https://raw.githubusercontent.com/user/zush/main/install.sh | zsh
 
-set -e  # Exit on any error
+set -e # Exit on any error
 
 # Colors for output
 RED='\033[0;31m'
@@ -78,8 +78,8 @@ confirm_install() {
     echo -n "   Install $1? [y/N] "
     read -r response </dev/tty 2>/dev/null || response=""
     case "$response" in
-        [yY][eE][sS]|[yY]) return 0 ;;
-        *) return 1 ;;
+    [yY][eE][sS] | [yY]) return 0 ;;
+    *) return 1 ;;
     esac
 }
 
@@ -108,16 +108,16 @@ install_tools() {
     for tool in "${brew_tools[@]}"; do
         install_brew_tool "$tool"
     done
-    
+
     # Special handling for fzf (may need build-from-source on arm64)
     install_fzf
-    
+
     # Special handling for glow (may need build-from-source on arm64)
     install_glow
-    
+
     # Special handling for direnv (may need build-from-source on arm64)
     install_direnv
-    
+
     # Special handling for neovim (may need build-from-source on arm64)
     install_neovim
 
@@ -143,12 +143,12 @@ install_pyenv_and_python() {
     if ! command -v pyenv >/dev/null 2>&1; then
         install_brew_tool "pyenv"
     fi
-    
+
     # Initialize pyenv in the current shell if available
     if command -v pyenv >/dev/null 2>&1; then
         eval "$(pyenv init -)"
     fi
-    
+
     if command -v pyenv >/dev/null 2>&1 && ! pyenv versions --bare | grep -q "^3.12"; then
         if confirm_install "Python 3.12"; then
             log_info "Installing Python 3.12 via pyenv..."
@@ -187,7 +187,7 @@ install_rustup_and_rust() {
         fi
     fi
     if command -v rustup >/dev/null 2>&1 && ! rustup toolchain list | grep -q "stable"; then
-         if confirm_install "Rust (stable toolchain)"; then
+        if confirm_install "Rust (stable toolchain)"; then
             log_info "Installing stable Rust toolchain..."
             rustup default stable
             log_success "Rust stable toolchain installed."
@@ -249,7 +249,7 @@ install_llm_plugins() {
 
     local llm_plugins=(
         "llm-gemini"
-        "git+https://github.com/shyndman/llm-anthropic.git"
+        "llm-anthropic"
         "git+https://github.com/shyndman/llm-complete-command.git"
     )
 
@@ -271,20 +271,20 @@ install_fzf() {
     if command -v fzf >/dev/null 2>&1; then
         return 0
     fi
-    
+
     # Early return if user declines
     if ! confirm_install "fzf"; then
         return 0
     fi
-    
+
     log_info "Installing fzf via Homebrew..."
-    
+
     # Try normal install first, return early if successful
     if brew install fzf 2>/dev/null; then
         log_success "fzf installed."
         return 0
     fi
-    
+
     # Fallback to build-from-source
     log_warning "Standard fzf installation failed (likely no bottle for arm64)."
     log_info "Attempting to build fzf from source (this may take a few minutes)..."
@@ -292,7 +292,7 @@ install_fzf() {
         log_success "fzf installed from source."
         return 0
     fi
-    
+
     log_error "Failed to install fzf even from source."
     return 1
 }
@@ -302,20 +302,20 @@ install_glow() {
     if command -v glow >/dev/null 2>&1; then
         return 0
     fi
-    
+
     # Early return if user declines
     if ! confirm_install "glow"; then
         return 0
     fi
-    
+
     log_info "Installing glow via Homebrew..."
-    
+
     # Try normal install first, return early if successful
     if brew install glow 2>/dev/null; then
         log_success "glow installed."
         return 0
     fi
-    
+
     # Fallback to build-from-source
     log_warning "Standard glow installation failed (likely no bottle for arm64)."
     log_info "Attempting to build glow from source (this may take a few minutes)..."
@@ -323,7 +323,7 @@ install_glow() {
         log_success "glow installed from source."
         return 0
     fi
-    
+
     log_error "Failed to install glow even from source."
     return 1
 }
@@ -333,20 +333,20 @@ install_direnv() {
     if command -v direnv >/dev/null 2>&1; then
         return 0
     fi
-    
+
     # Early return if user declines
     if ! confirm_install "direnv"; then
         return 0
     fi
-    
+
     log_info "Installing direnv via Homebrew..."
-    
+
     # Try normal install first, return early if successful
     if brew install direnv 2>/dev/null; then
         log_success "direnv installed."
         return 0
     fi
-    
+
     # Fallback to build-from-source
     log_warning "Standard direnv installation failed (likely no bottle for arm64)."
     log_info "Attempting to build direnv from source (this may take a few minutes)..."
@@ -354,7 +354,7 @@ install_direnv() {
         log_success "direnv installed from source."
         return 0
     fi
-    
+
     log_error "Failed to install direnv even from source."
     return 1
 }
@@ -364,20 +364,20 @@ install_neovim() {
     if command -v nvim >/dev/null 2>&1; then
         return 0
     fi
-    
+
     # Early return if user declines
     if ! confirm_install "neovim"; then
         return 0
     fi
-    
+
     log_info "Installing neovim via Homebrew..."
-    
+
     # Try normal install first, return early if successful
     if brew install neovim 2>/dev/null; then
         log_success "neovim installed."
         return 0
     fi
-    
+
     # Fallback to build-from-source
     log_warning "Standard neovim installation failed (likely no bottle for arm64)."
     log_info "Attempting to build neovim from source (this may take a few minutes)..."
@@ -385,7 +385,7 @@ install_neovim() {
         log_success "neovim installed from source."
         return 0
     fi
-    
+
     log_error "Failed to install neovim even from source."
     return 1
 }
@@ -410,14 +410,14 @@ handle_existing_installation() {
         echo -n "   Remove existing installation and reinstall? [y/N] "
         read -r response </dev/tty 2>/dev/null || response=""
         case "$response" in
-            [yY][eE][sS]|[yY])
-                log_info "Removing existing installation..."
-                rm -rf "$ZUSH_DIR"
-                ;;
-            *)
-                log_info "Installation cancelled."
-                exit 0
-                ;;
+        [yY][eE][sS] | [yY])
+            log_info "Removing existing installation..."
+            rm -rf "$ZUSH_DIR"
+            ;;
+        *)
+            log_info "Installation cancelled."
+            exit 0
+            ;;
         esac
     fi
 }
@@ -434,14 +434,14 @@ backup_zshenv() {
         echo -n "   Proceed with renaming your .zshenv? [y/N] "
         read -r response </dev/tty 2>/dev/null || response=""
         case "$response" in
-            [yY][eE][sS]|[yY])
-                log_info "Backing up existing .zshenv to .zshenv.old"
-                ;;
-            *)
-                log_error "Cannot install Zush without replacing .zshenv"
-                echo "   Installation cancelled."
-                exit 1
-                ;;
+        [yY][eE][sS] | [yY])
+            log_info "Backing up existing .zshenv to .zshenv.old"
+            ;;
+        *)
+            log_error "Cannot install Zush without replacing .zshenv"
+            echo "   Installation cancelled."
+            exit 1
+            ;;
         esac
 
         if [[ -f "$backup_file" ]]; then
@@ -449,11 +449,11 @@ backup_zshenv() {
             echo -n "   Overwrite existing .zshenv.old backup? [y/N] "
             read -r response </dev/tty 2>/dev/null || response=""
             case "$response" in
-                [yY][eE][sS]|[yY]) ;;
-                *)
-                    log_error "Cannot proceed without backing up .zshenv"
-                    exit 1
-                    ;;
+            [yY][eE][sS] | [yY]) ;;
+            *)
+                log_error "Cannot proceed without backing up .zshenv"
+                exit 1
+                ;;
             esac
         fi
 
@@ -516,14 +516,14 @@ check_starship_config() {
         echo -n "   Create instant-starship.toml for faster prompts? [Y/n] "
         read -r response </dev/tty 2>/dev/null || response=""
         case "$response" in
-            [nN][oO]|[nN])
-                log_info "Skipping instant starship config"
-                return
-                ;;
-            *)
-                # Copy existing config and append disable rules
-                cat "$starship_config" > "$instant_config"
-                cat >> "$instant_config" << 'EOF'
+        [nN][oO] | [nN])
+            log_info "Skipping instant starship config"
+            return
+            ;;
+        *)
+            # Copy existing config and append disable rules
+            cat "$starship_config" >"$instant_config"
+            cat >>"$instant_config" <<'EOF'
 
 # Disable slow modules for instant prompts
 [git_branch]
@@ -565,8 +565,8 @@ disabled = true
 [env_var]
 disabled = true
 EOF
-                log_success "Created instant starship configuration"
-                ;;
+            log_success "Created instant starship configuration"
+            ;;
         esac
     else
         log_info "Instant starship config already exists"
@@ -576,9 +576,9 @@ EOF
 # Offer to create machine-specific config
 create_zushrc() {
     log_info "Setting up machine-specific configuration..."
-    
+
     local zushrc_file="$HOME/.zushrc"
-    
+
     echo ""
     echo "${BLUE}About ~/.zushrc:${NC}"
     echo "  • Machine-specific configuration file for Zush"
@@ -587,22 +587,22 @@ create_zushrc() {
     echo "  • Automatically compiled for performance"
     echo "  • Stays out of version control"
     echo ""
-    
+
     if [[ -f "$zushrc_file" ]]; then
         log_info "~/.zushrc already exists, skipping creation"
         return
     fi
-    
+
     echo -n "   Create ~/.zushrc with example configurations? [Y/n] "
     read -r response </dev/tty 2>/dev/null || response=""
     case "$response" in
-        [nN][oO]|[nN])
-            log_info "Skipping ~/.zushrc creation"
-            echo "   You can create it later with machine-specific configurations"
-            ;;
-        *)
-            log_info "Creating ~/.zushrc with examples..."
-            cat > "$zushrc_file" << 'EOF'
+    [nN][oO] | [nN])
+        log_info "Skipping ~/.zushrc creation"
+        echo "   You can create it later with machine-specific configurations"
+        ;;
+    *)
+        log_info "Creating ~/.zushrc with examples..."
+        cat >"$zushrc_file" <<'EOF'
 # ~/.zushrc - Machine-specific Zush configuration
 # This file is loaded after all main rc.d scripts, so it can override anything
 
@@ -624,10 +624,10 @@ create_zushrc() {
 
 # Add your machine-specific configurations here...
 EOF
-            chmod 644 "$zushrc_file"
-            log_success "Created ~/.zushrc with example configurations"
-            echo "   Edit ~/.zushrc to add your machine-specific settings"
-            ;;
+        chmod 644 "$zushrc_file"
+        log_success "Created ~/.zushrc with example configurations"
+        echo "   Edit ~/.zushrc to add your machine-specific settings"
+        ;;
     esac
 }
 
