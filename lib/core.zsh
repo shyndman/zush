@@ -41,7 +41,11 @@ _zush_source() {
 _zush_eval_clear() {
     local eval_cache_dir="${ZUSH_CACHE_DIR}/eval"
     if [[ -d $eval_cache_dir ]]; then
-        rm -rf "$eval_cache_dir"/* && echo "Cleared eval cache."
+        setopt localoptions null_glob
+        local cached_items=("$eval_cache_dir"/*)
+        if (( ${#cached_items[@]} )); then
+            rm -rf "${cached_items[@]}" && echo "Cleared eval cache."
+        fi
     fi
 }
 
