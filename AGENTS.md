@@ -103,6 +103,19 @@ Zush is a modular, performance-aware zsh configuration system designed to achiev
 
 ## Technical Implementation Details
 
+### Function Naming Convention
+
+Zush follows a consistent naming pattern to distinguish between public and internal APIs:
+
+- `zush_*()` - Public API functions (e.g., `zush_lazy_load`, `zush_lazy_eval`)
+- `_zush_*()` - Internal helper functions (e.g., `_zush_apply_cached_env`, `_zush_do_tool_initialization`)
+- `zushp*()` - Plugin system public API (e.g., `zushp`, `zushp_update`)
+- `_zushp_*()` - Plugin system internals (e.g., `_zushp_clone_plugin`, `_zushp_find_plugin_file`)
+- `zushc*()` - Compiler public API (e.g., `zushc`, `zushc_all`)
+- `_zushc_*()` - Compiler internals (e.g., `_zushc_file`, `_zushc_dir`)
+
+This convention helps contributors quickly identify API boundaries and understand which functions are intended for direct use versus internal implementation details.
+
 ### Lazy Loading Strategy
 ```zsh
 # Example: nvm lazy loading
