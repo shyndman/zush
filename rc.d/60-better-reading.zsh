@@ -7,7 +7,9 @@ if ! command -v bat >/dev/null 2>&1; then
 fi
 
 # Batman for enhanced man pages
-eval "$(batman --export-env)"
+if command -v batman >/dev/null 2>&1; then
+    eval "$(batman --export-env)" || zush_error "Failed to initialize batman environment"
+fi
 
 # Bat-extras aliases
 alias bg='batgrep'

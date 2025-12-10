@@ -25,7 +25,11 @@ _zush_do_tool_initialization() {
     printenv | sort > "$_baseline_env_file"
 
     # Initialize the tool
-    eval "$init_command"
+    if ! eval "$init_command"; then
+        zush_error "Failed to initialize $tool: eval command returned non-zero status"
+        rm -f "$_baseline_env_file"
+        return 1
+    fi
 
     # Check for environment changes
     local _new_env_file=$(mktemp)
@@ -98,7 +102,10 @@ zush_lazy_load() {
             zush_debug 'Lazy loading $tool via command: $cmd'
             local _cmd
             for _cmd in ${commands[*]}; do unfunction \"\$_cmd\" 2>/dev/null; done
-            eval \"$init_command\"
+            eval \"$init_command\" || {
+                zush_error \"Failed to initialize $tool via lazy load\"
+                return 1
+            }
             \"\$0\" \"\$@\"
         }
         "
@@ -123,7 +130,11 @@ zush_lazy_eval() {
         zush_debug "No environment cache for '$tool'. Generating all caches."
         if [[ ! -f "$eval_cache_file" ]]; then
             zush_debug "No eval cache for '$tool'. Executing command to create it."
-            eval "$command_to_execute" > "$eval_cache_file"
+            if ! eval "$command_to_execute" > "$eval_cache_file"; then
+                zush_error "Failed to execute command for $tool eval cache"
+                rm -f "$eval_cache_file"
+                return 1
+            fi
         fi
         # Now that the eval cache exists, use it to initialize the environment
         _zush_do_tool_initialization "$tool" "eval \"\$(<'$eval_cache_file')\"" 1
@@ -142,7 +153,11 @@ zush_lazy_eval() {
 
             if [[ ! -f '$eval_cache_file' ]]; then
                 zush_debug \"Cache miss for '$tool' eval, executing command.\"
-                eval \"$command_to_execute\" > '$eval_cache_file'
+                if ! eval \"$command_to_execute\" > '$eval_cache_file'; then
+                    zush_error \"Failed to create eval cache for $tool\"
+                    rm -f '$eval_cache_file'
+                    return 1
+                fi
             fi
 
             eval \"\$(<'$eval_cache_file')\"
