@@ -69,6 +69,34 @@ _zush_start_update_check() {
     fi
 }
 
+# Perform the update with user prompt
+_zush_do_update() {
+    echo ""
+    echo "🦥 Zush update available!"
+    echo -n "   Update now? [Y/n] "
+    read -r response
+    case "$response" in
+        [nN][oO]|[nN])
+            echo "   Update postponed. You'll be reminded next time."
+            return 1
+            ;;
+        *)
+            echo "   Updating Zush..."
+            local current_dir="$PWD"
+            cd "$ZUSH_HOME" || return 1
+            if git pull --quiet 2>/dev/null; then
+                echo "   ✅ Zush updated successfully!"
+                echo "   Restart your shell to use the latest version."
+                rm -f "$ZUSH_UPDATE_AVAILABLE_FILE"
+            else
+                echo "   ⚠️  Update failed. Try manually: cd ~/.config/zush && git pull"
+            fi
+            cd "$current_dir"
+            ;;
+    esac
+    echo ""
+}
+
 # Check if update is available and prompt user
 _zush_prompt_available_update() {
     # Skip if not interactive
@@ -79,32 +107,7 @@ _zush_prompt_available_update() {
 
     # Check if update is available
     if [[ -f "$ZUSH_UPDATE_AVAILABLE_FILE" ]]; then
-        echo ""
-        echo "🦥 Zush update available!"
-        echo -n "   Update now? [Y/n] "
-        read -r response
-
-        case "$response" in
-            [nN][oO]|[nN])
-                echo "   Update postponed. You'll be reminded next time."
-                ;;
-            *)
-                echo "   Updating Zush..."
-                local current_dir="$PWD"
-                cd "$ZUSH_HOME" || return 1
-
-                if git pull --quiet 2>/dev/null; then
-                    echo "   ✅ Zush updated successfully!"
-                    echo "   Restart your shell to use the latest version."
-                    # Remove update available file
-                    rm -f "$ZUSH_UPDATE_AVAILABLE_FILE"
-                else
-                    echo "   ⚠️  Update failed. Try manually: cd ~/.config/zush && git pull"
-                fi
-                cd "$current_dir"
-                ;;
-        esac
-        echo ""
+        _zush_do_update
     fi
 }
 
@@ -112,41 +115,16 @@ _zush_prompt_available_update() {
 update-zush() {
     # Force an immediate update check regardless of interval
     zush_debug "Running manual update check"
-    
+
     # Perform the check (reusing background check logic)
     if _zush_background_update_check; then
         # Check if update is available and prompt user (ignoring debug/profile flags)
         # Skip if not interactive
         [[ ! -o interactive ]] && return
-        
+
         # Check if update is available
         if [[ -f "$ZUSH_UPDATE_AVAILABLE_FILE" ]]; then
-            echo ""
-            echo "🦥 Zush update available!"
-            echo -n "   Update now? [Y/n] "
-            read -r response
-
-            case "$response" in
-                [nN][oO]|[nN])
-                    echo "   Update postponed. You'll be reminded next time."
-                    ;;
-                *)
-                    echo "   Updating Zush..."
-                    local current_dir="$PWD"
-                    cd "$ZUSH_HOME" || return 1
-
-                    if git pull --quiet 2>/dev/null; then
-                        echo "   ✅ Zush updated successfully!"
-                        echo "   Restart your shell to use the latest version."
-                        # Remove update available file
-                        rm -f "$ZUSH_UPDATE_AVAILABLE_FILE"
-                    else
-                        echo "   ⚠️  Update failed. Try manually: cd ~/.config/zush && git pull"
-                    fi
-                    cd "$current_dir"
-                    ;;
-            esac
-            echo ""
+            _zush_do_update
         else
             echo "🦥 Zush is already up to date!"
         fi
