@@ -111,10 +111,11 @@ Zush follows a consistent naming pattern to distinguish between public and inter
 - `_zush_*()` - Internal helper functions (e.g., `_zush_apply_cached_env`, `_zush_do_tool_initialization`)
 - `zushp*()` - Plugin system public API (e.g., `zushp`, `zushp_update`)
 - `_zushp_*()` - Plugin system internals (e.g., `_zushp_clone_plugin`, `_zushp_find_plugin_file`)
-- `zushc*()` - Compiler public API (e.g., `zushc`, `zushc_all`)
-- `_zushc_*()` - Compiler internals (e.g., `_zushc_file`, `_zushc_dir`)
+- `_zushc*()` - Compiler functions (e.g., `_zushc`, `_zushc_all`, `_zushc_file`)
 
 This convention helps contributors quickly identify API boundaries and understand which functions are intended for direct use versus internal implementation details.
+
+**Note**: The compiler functions (`_zushc*`) are all currently internal, though they may be exposed via aliases or wrappers in the future.
 
 ### Lazy Loading Strategy
 ```zsh
