@@ -79,12 +79,12 @@ zushp() {
 
     # Validate user/repo format
     if [[ -z "$user_repo" ]]; then
-        zush_error "Usage: zushp <user/repo>"
+        zush_error "Usage: zushp <user/repo> (got: '$user_repo')"
         return 1
     fi
 
     if [[ ! "$user_repo" =~ ^[a-zA-Z0-9_-]+/[a-zA-Z0-9_.-]+$ ]]; then
-        zush_error "Invalid format. Use: zushp <user/repo>"
+        zush_error "Invalid format. Use: zushp <user/repo> (got: '$user_repo')"
         return 1
     fi
     
