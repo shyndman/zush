@@ -1,2 +1,1 @@
-# TODO: Cache the subshell result
-eval "$(direnv hook zsh)"
+zush_cached_eval direnv "direnv hook zsh"

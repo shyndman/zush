@@ -152,6 +152,33 @@ zush_lazy_eval() {
     done
 }
 
+# --- Cached Eval (Non-Lazy) ---
+
+# Caches the output of an eval command and sources it on subsequent runs.
+# Unlike zush_lazy_eval, this runs immediately on startup (not lazy-loaded).
+# The cache is invalidated by the standard 7-day cache invalidation mechanism.
+#
+# Usage: zush_cached_eval <name> <command>
+# Example: zush_cached_eval direnv "direnv hook zsh"
+zush_cached_eval() {
+    local name=$1
+    local command_to_execute=$2
+
+    local eval_cache_dir="${ZUSH_CACHE_DIR}/eval"
+    mkdir -p "$eval_cache_dir"
+    local command_hash=$(echo -n "$command_to_execute" | md5sum | cut -d' ' -f1)
+    local cache_file="${eval_cache_dir}/${name}-${command_hash}"
+
+    if [[ -f "$cache_file" ]]; then
+        zush_debug "Using cached eval output for '$name'"
+        source "$cache_file"
+    else
+        zush_debug "Generating eval cache for '$name'"
+        eval "$command_to_execute" > "$cache_file"
+        source "$cache_file"
+    fi
+}
+
 # --- Cache Management ---
 
 _zush_lazy_clear() {
