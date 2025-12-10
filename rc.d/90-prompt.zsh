@@ -17,8 +17,15 @@ if [[ ! -f "$STARSHIP_CONFIG" ]]; then
 
     zush_debug "Installing starship config"
     mkdir -p "${STARSHIP_CONFIG:h}"
-    curl -sSL "https://gist.githubusercontent.com/shyndman/01c8e8bfc197cfe8c56f41ca195921d1/raw/2615d222b3b297938987cba40beb8a83cc3a8233/starship.toml" -o "$STARSHIP_CONFIG"
+    if ! curl -sSL "https://gist.githubusercontent.com/shyndman/01c8e8bfc197cfe8c56f41ca195921d1/raw/2615d222b3b297938987cba40beb8a83cc3a8233/starship.toml" -o "$STARSHIP_CONFIG"; then
+        zush_error "Failed to download starship config"
+        rm -f "$STARSHIP_CONFIG"
+        return 1
+    fi
 fi
 
 # Initialize Starship prompt
-eval "$(starship init zsh)"
+if ! eval "$(starship init zsh)"; then
+    zush_error "Failed to initialize starship prompt"
+    return 1
+fi
