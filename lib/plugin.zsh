@@ -9,7 +9,11 @@ typeset -g ZUSH_PLUGINS_MANIFEST="${ZUSH_CACHE_DIR:-$HOME/.cache/zush}/plugins-m
 # Create plugin directory if needed
 [[ ! -d "${ZUSH_PLUGINS_DIR}" ]] && mkdir -p "${ZUSH_PLUGINS_DIR}" 2>/dev/null
 
+# Function: _zushp_find_plugin_file
 # Find the main plugin file in a repository
+# Parameters:
+#   $1: plugin_dir - directory containing the plugin repository
+# Returns: 0 on success (prints plugin file path), 1 if no plugin file found
 _zushp_find_plugin_file() {
     local plugin_dir="$1"
     local repo_name="${plugin_dir:t}"
@@ -31,7 +35,11 @@ _zushp_find_plugin_file() {
     return 1
 }
 
-# Clone a plugin repository
+# Function: _zushp_clone_plugin
+# Clone a plugin repository from GitHub
+# Parameters:
+#   $1: user_repo - GitHub repository in 'user/repo' format
+# Returns: 0 on success, 1 on clone failure
 _zushp_clone_plugin() {
     local user_repo="$1"
     local plugin_name="${user_repo##*/}"
@@ -54,7 +62,12 @@ _zushp_clone_plugin() {
     fi
 }
 
-# Add plugin to manifest for tracking
+# Function: _zushp_add_to_manifest
+# Add plugin to manifest file for tracking
+# Parameters:
+#   $1: user_repo - GitHub repository in 'user/repo' format
+#   $2: plugin_file - path to the main plugin file
+# Returns: 0 on success
 _zushp_add_to_manifest() {
     local user_repo="$1"
     local plugin_name="${user_repo##*/}"
@@ -73,7 +86,11 @@ _zushp_add_to_manifest() {
     echo "${plugin_name}:${user_repo}:${plugin_file}" >> "$ZUSH_PLUGINS_MANIFEST"
 }
 
-# Main plugin function
+# Function: zushp
+# Main plugin installation function
+# Parameters:
+#   $1: user_repo - GitHub repository in 'user/repo' format
+# Returns: 0 on success, 1 on validation or installation failure
 zushp() {
     local user_repo="$1"
 
@@ -118,7 +135,11 @@ zushp() {
     _zush_source "$plugin_file"
 }
 
-# Update plugins
+# Function: zushp_update
+# Update installed plugins
+# Parameters:
+#   $1: target_plugin - optional plugin name to update (updates all if omitted)
+# Returns: 0 on success, 1 if no plugins installed
 zushp_update() {
     local target_plugin="$1"
     
@@ -144,7 +165,10 @@ zushp_update() {
     done < "$ZUSH_PLUGINS_MANIFEST"
 }
 
-# Clean all plugins
+# Function: _zushp_clean
+# Clean all plugins and manifest with user confirmation
+# Parameters: none
+# Returns: 0 on success
 _zushp_clean() {
     local confirm
     echo -n "Remove all plugins and cache? [y/N] "

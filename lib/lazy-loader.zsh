@@ -3,7 +3,11 @@
 
 # --- Environment Caching ---
 
-# Applies a tool's cached environment. Returns 1 if no cache exists.
+# Function: _zush_apply_cached_env
+# Applies a tool's cached environment from disk
+# Parameters:
+#   $1: tool - name of the tool whose cached environment to apply
+# Returns: 0 on success, 1 if no cache exists
 _zush_apply_cached_env() {
     local tool=$1
     local cache_file="${ZUSH_CACHE_DIR}/${tool}-env"
@@ -12,7 +16,13 @@ _zush_apply_cached_env() {
     source "$cache_file"
 }
 
-# Captures and caches environment changes after a tool is initialized.
+# Function: _zush_do_tool_initialization
+# Captures and caches environment changes after a tool is initialized
+# Parameters:
+#   $1: tool - name of the tool being initialized
+#   $2: init_command - command to execute for initialization
+#   $3: warn_on_no_changes - whether to warn if no environment changes detected (default: 1)
+# Returns: 0 on success, 1 on initialization failure
 _zush_do_tool_initialization() {
     local tool=$1
     local init_command=$2
@@ -82,6 +92,13 @@ _zush_do_tool_initialization() {
 
 # --- Standard Lazy Loading ---
 
+# Function: zush_lazy_load
+# Registers commands for lazy loading with environment caching
+# Parameters:
+#   $1: tool - name used for cache files and debug output
+#   $2: init_command - command to run for initialization
+#   $@: commands - command names that trigger initialization
+# Returns: 0 on success, 1 on parameter validation failure
 zush_lazy_load() {
     local tool=$1
     local init_command=$2
@@ -126,6 +143,13 @@ zush_lazy_load() {
 
 # --- Eval-Cached Lazy Loading ---
 
+# Function: zush_lazy_eval
+# Registers commands for lazy loading with eval output caching
+# Parameters:
+#   $1: tool - name used for cache files and debug output
+#   $2: command_to_execute - command whose output will be evaluated
+#   $@: placeholders - command names that trigger initialization
+# Returns: 0 on success, 1 on failure
 zush_lazy_eval() {
     local tool=$1
     local command_to_execute=$2
