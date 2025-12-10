@@ -1,6 +1,8 @@
 # Zush 🦥 - Mid-Performance ZSH Configuration
 
-[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/shyndman/zush/main.svg)](https://results.pre-commit.ci/latest/github/shyndman/zush/main)
+[![pre-commit](https://github.com/shyndman/zush/actions/workflows/pre-commit.yml/badge.svg)](https://github.com/shyndman/zush/actions/workflows/pre-commit.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Shell: zsh](https://img.shields.io/badge/Shell-zsh-informational)](https://www.zsh.org/)
 
 My personal ZSH configuration framework.
 
