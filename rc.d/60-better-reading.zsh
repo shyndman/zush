@@ -8,7 +8,10 @@ fi
 
 # Batman for enhanced man pages
 if command -v batman >/dev/null 2>&1; then
-    eval "$(batman --export-env)" || zush_error "Failed to initialize batman environment"
+    eval "$(batman --export-env)" || {
+        zush_error "Failed to initialize batman environment"
+        return 1
+    }
 fi
 
 # Bat-extras aliases
