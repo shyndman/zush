@@ -85,6 +85,18 @@ _zush_do_tool_initialization() {
 zush_lazy_load() {
     local tool=$1
     local init_command=$2
+
+    # Validate required parameters
+    if [[ -z "$tool" ]]; then
+        zush_error "zush_lazy_load: tool name is required (got: '$tool')"
+        return 1
+    fi
+
+    if [[ -z "$init_command" ]]; then
+        zush_error "zush_lazy_load: init command is required (got: '$init_command')"
+        return 1
+    fi
+
     shift 2
     local -a commands=("$@")
 
