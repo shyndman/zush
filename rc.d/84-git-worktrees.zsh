@@ -107,7 +107,7 @@ _gwt_message() {
 }
 
 _gwt_require_git() {
-    if ! command -v git >/dev/null 2>&1; then
+    if ! (( ${+commands[git]} )); then
         _gwt_error "git is not available"
         return 1
     fi
