@@ -68,7 +68,7 @@ _sysexec() {
 }
 
 # Generate bash function/zsh widgets.
-for i in ${_SYS_ALIASES[@]}; do
+for i in "${_SYS_ALIASES[@]}"; do
     source /dev/stdin <<EOF
 $i() {
     _sysexec $i

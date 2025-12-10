@@ -35,7 +35,7 @@ q() {
     return 1
   fi
 
-  llm --model=anthropic/claude-sonnet-4-0 -o web_search 1 $@ | glow
+  llm --model=anthropic/claude-sonnet-4-0 -o web_search 1 "$@" | glow
   echo -e "Continue conversation with: \033[1;37mllm chat --continue\033[0m"
 }
 

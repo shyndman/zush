@@ -24,8 +24,8 @@ alias history="history 0"
 autoload -Uz history-search-end
 zle -N history-beginning-search-backward-end history-search-end
 zle -N history-beginning-search-forward-end history-search-end
-bindkey "$terminfo[kcuu1]" history-beginning-search-backward-end
-bindkey "$terminfo[kcud1]" history-beginning-search-forward-end
+bindkey "${terminfo[kcuu1]}" history-beginning-search-backward-end
+bindkey "${terminfo[kcud1]}" history-beginning-search-forward-end
 
 # Hishtory integration (optional - only loads if available)
 # Note: paths should be customized for your setup
