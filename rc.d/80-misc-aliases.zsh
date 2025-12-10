@@ -8,3 +8,5 @@ alias opr='op run --no-masking --env-file .env -- '
 
 alias kssh='kitten ssh'
 alias icat="kitten icat"
+alias -g cbcopy='kitten clipboard'
+alias -g cbpaste='kitten clipboard --get'
