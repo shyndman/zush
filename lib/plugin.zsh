@@ -76,8 +76,17 @@ _zushp_add_to_manifest() {
 # Main plugin function
 zushp() {
     local user_repo="$1"
-    
-    [[ -z "$user_repo" ]] && { echo "Usage: zushp <user/repo>"; return 1; }
+
+    # Validate user/repo format
+    if [[ -z "$user_repo" ]]; then
+        zush_error "Usage: zushp <user/repo> (got: '$user_repo')"
+        return 1
+    fi
+
+    if [[ ! "$user_repo" =~ ^[a-zA-Z0-9_-]+/[a-zA-Z0-9_.-]+$ ]]; then
+        zush_error "Invalid format. Use: zushp <user/repo> (got: '$user_repo')"
+        return 1
+    fi
     
     local plugin_name="${user_repo##*/}"
     local plugin_dir="${ZUSH_PLUGINS_DIR}/${plugin_name}"
