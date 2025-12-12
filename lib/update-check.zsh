@@ -59,6 +59,8 @@ _zush_background_update_check() {
         # No update - remove available file if it exists
         [[ -f "$ZUSH_UPDATE_AVAILABLE_FILE" ]] && rm -f "$ZUSH_UPDATE_AVAILABLE_FILE"
     fi
+
+    return 0
 }
 
 # Start background update check if needed
