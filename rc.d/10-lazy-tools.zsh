@@ -5,7 +5,7 @@
 [[ -x /home/linuxbrew/.linuxbrew/bin/brew ]] && \
     zush_lazy_eval brew '/home/linuxbrew/.linuxbrew/bin/brew shellenv' brew
 
-ZUSH_ESP_IDF_EXPORT_SCRIPT=${ZUSH_ESP_IDF_EXPORT_SCRIPT:-~/dev/lib/esp/current/esp-idf/export.sh}
+ZUSH_ESP_IDF_EXPORT_SCRIPT=${ZUSH_ESP_IDF_EXPORT_SCRIPT:-"$IDF_PATH/export.sh"}
 
 export-esp() {
     if [[ ! -r $ZUSH_ESP_IDF_EXPORT_SCRIPT ]]; then
@@ -23,7 +23,7 @@ export-esp() {
 
 # Python via pyenv
 command -v pyenv >/dev/null 2>&1 && \
-    zush_lazy_eval pyenv 'pyenv init -' pyenv python pip uv uvx 
+    zush_lazy_eval pyenv 'pyenv init -' pyenv python pip uv uvx
 
 # Rust via cargo
 [[ -f ~/.cargo/env ]] && \
