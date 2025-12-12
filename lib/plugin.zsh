@@ -89,7 +89,9 @@ _zushp_add_to_manifest() {
 # Function: zushp
 # Main plugin installation function
 # Parameters:
-#   $1: user_repo - GitHub repository in 'user/repo' format
+#   $1: user_repo - GitHub repository in 'user/repo' format (required)
+#       - user: alphanumeric, underscores, hyphens [a-zA-Z0-9_-]+
+#       - repo: alphanumeric, underscores, hyphens, dots [a-zA-Z0-9_.-]+
 # Returns: 0 on success, 1 on validation or installation failure
 zushp() {
     local user_repo="$1"

@@ -205,6 +205,12 @@ zush_lazy_eval() {
 
 # --- Cache Management ---
 
+# Function: _zush_lazy_clear
+# Clears cached environment files for lazy-loaded tools
+# Parameters:
+#   $1: tool (optional) - name of tool to clear cache for; if omitted, clears all caches
+# Returns: 0 on success
+# Side effects: When clearing all caches, also clears eval caches via _zush_eval_clear
 _zush_lazy_clear() {
     local tool=$1
     if [[ -n $tool ]]; then
@@ -215,7 +221,11 @@ _zush_lazy_clear() {
     fi
 }
 
-# Refresh cache for a tool (clear and reinitialize on next use)
+# Function: _zush_lazy_refresh
+# Clears a tool's cache so it will be regenerated on next use
+# Parameters:
+#   $1: tool - name of the tool whose cache to refresh (required)
+# Returns: 0 on success, 1 if tool name not provided
 _zush_lazy_refresh() {
     local tool=$1
     [[ -n $tool ]] || { echo "Usage: _zush_lazy_refresh <tool>"; return 1; }
@@ -224,7 +234,11 @@ _zush_lazy_refresh() {
     echo "Cache cleared for $tool. It will be regenerated on next use."
 }
 
-# Show status of lazy-loaded tools
+# Function: _zush_lazy_status
+# Displays all cached lazy-loaded tools with their cache timestamps
+# Parameters: none
+# Returns: 0 always
+# Notes: Uses GNU stat with BSD fallback for cross-platform compatibility
 _zush_lazy_status() {
     local cache_file tool cache_date
     local -a cache_files=("${ZUSH_CACHE_DIR}"/*-env(N))
@@ -245,7 +259,11 @@ _zush_lazy_status() {
     done
 }
 
-# Show environment diff for a cached tool
+# Function: _zush_lazy_diff
+# Displays the contents of a tool's cached environment file
+# Parameters:
+#   $1: tool - name of the tool whose cache to display (required)
+# Returns: 0 on success, 1 if tool name not provided or cache doesn't exist
 _zush_lazy_diff() {
     local tool=$1
     [[ -n $tool ]] || { echo "Usage: _zush_lazy_diff <tool>"; return 1; }

@@ -134,11 +134,11 @@ zush_lazy_load nvm 'source ~/.nvm/nvm.sh' nvm node npm npx
 
 ### Compilation System
 ```zsh
-# Smart compilation with zushc
-zushc file.zsh        # compile single file
-zushc directory/      # compile all .zsh files in directory
-zushc_all            # compile entire configuration
-zushc_bg             # background compilation
+# Smart compilation with _zushc
+_zushc file.zsh       # compile single file
+_zushc directory/     # compile all .zsh files in directory
+_zushc_all            # compile entire configuration
+_zushc_bg             # background compilation
 ```
 
 ## Usage
@@ -216,10 +216,10 @@ zushp_update plugin-name # Update specific plugin
 zushp_clean              # Remove all plugins
 
 # Compilation
-zushc file.zsh           # Compile single file
-zushc directory/         # Compile directory
-zushc_all               # Compile entire configuration
-zushc_bg                # Background compilation
+_zushc file.zsh          # Compile single file
+_zushc directory/        # Compile directory
+_zushc_all               # Compile entire configuration
+_zushc_bg                # Background compilation
 ```
 
 ### Configuration Variables
