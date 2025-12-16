@@ -1,33 +1,3 @@
-# Gemini CLI
-export GEMINI_MODE=core
-export GEMINI_SYSTEM_MD="~/.gemini/prompts/$GEMINI_MODE.md"
-
-gemini-mode() {
-  if [ -z "$1" ]; then
-    # No argument - show current mode
-    if [ -n "$GEMINI_SYSTEM_MD" ]; then
-      local current_mode=$(basename "$GEMINI_SYSTEM_MD" .md)
-      echo "Current Gemini mode: $current_mode"
-    else
-      echo "No Gemini mode set"
-    fi
-    return
-  fi
-
-  local mode="$1"
-  local prompt_file="$HOME/.gemini/prompts/${mode}.md"
-
-  if [ -f "$prompt_file" ]; then
-    export GEMINI_MODE="$mode"
-    export GEMINI_SYSTEM_MD="$prompt_file"
-    echo "Gemini mode set to: $mode"
-  else
-    echo "Error: Prompt file not found: $prompt_file" >&2
-    return 1
-  fi
-}
-alias gemm=gemini-mode
-
 # Queries an LLM, displaying the result with glow
 q() {
   if [ -z "$1" ]; then
@@ -35,7 +5,7 @@ q() {
     return 1
   fi
 
-  llm --model=anthropic/claude-sonnet-4-0 -o web_search 1 "$@" | glow
+  llm -o web_search 1 "$@" | glow
   echo -e "Continue conversation with: \033[1;37mllm chat --continue\033[0m"
 }
 
