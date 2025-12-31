@@ -110,3 +110,8 @@ claude-chrome() {
     # Invoke claude with pass-through arguments
     claude "$@"
 }
+
+# Run claude with dangerous permissions skipped (for automation/testing)
+dangerclaude() {
+    claude --dangerously-skip-permissions "$@"
+}
