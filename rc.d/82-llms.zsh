@@ -1,3 +1,6 @@
+alias oc='opencode'
+alias occ='opencode --continue'
+
 # Queries an LLM, displaying the result with glow
 q() {
   if [ -z "$1" ]; then
