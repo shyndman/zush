@@ -40,17 +40,38 @@ _zush_background_update_check() {
     local current_dir="$PWD"
     cd "$ZUSH_HOME" || return 1
 
+    local remote_ref=""
+    local remote_name=""
+    local remote_branch=""
+
+    remote_ref=$(git rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null)
+    if [[ -z "$remote_ref" ]]; then
+        remote_ref=$(git symbolic-ref -q --short refs/remotes/origin/HEAD 2>/dev/null)
+    fi
+
+    if [[ -z "$remote_ref" ]]; then
+        cd "$current_dir"
+        return 1
+    fi
+
+    remote_name="${remote_ref%%/*}"
+    remote_branch="${remote_ref#*/}"
+
     # Fetch latest changes silently
-    if ! git fetch origin main --quiet 2>/dev/null; then
+    if ! git fetch "$remote_name" "$remote_branch" --quiet 2>/dev/null; then
         cd "$current_dir"
         return 1
     fi
 
     # Check if updates are available
     local local_commit=$(git rev-parse HEAD 2>/dev/null)
-    local remote_commit=$(git rev-parse origin/main 2>/dev/null)
+    local remote_commit=$(git rev-parse "$remote_ref" 2>/dev/null)
 
     cd "$current_dir"
+
+    if [[ -z "$local_commit" || -z "$remote_commit" ]]; then
+        return 1
+    fi
 
     if [[ "$local_commit" != "$remote_commit" ]]; then
         # Update available - write to file with timestamp
