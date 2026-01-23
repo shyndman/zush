@@ -1,6 +1,10 @@
 alias oc='opencode'
 alias occ='opencode --continue'
 
+export DRAGON_NPU_HOME="$HOME/.dragon-npu-env"
+alias dnpu="$DRAGON_NPU_HOME/bin/dragon-npu"
+alias dragon-npu="$DRAGON_NPU_HOME/bin/dragon-npu"
+
 # Queries an LLM, displaying the result with glow
 q() {
   if [ -z "$1" ]; then
