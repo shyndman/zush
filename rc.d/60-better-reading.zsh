@@ -22,6 +22,10 @@ alias bw='batwatch'
 # Replace cat with bat (no line numbers by default)
 alias cat='bat --style=plain'
 
+# Render CLI help with bat
+alias -g -- -h='-h 2>&1 | bat --language=help --style=plain'
+alias -g -- --help='--help 2>&1 | bat --language=help --style=plain'
+
 # Used for rendering Mermaid charts
 mermaid() {
     npx -p @mermaid-js/mermaid-cli mmdc

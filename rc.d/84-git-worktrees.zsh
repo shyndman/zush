@@ -16,7 +16,7 @@ gwt() {
             -y|--yes)
                 auto_yes=1
                 ;;
-            --help|-h)
+            \--help|\-h)
                 _gwt_usage
                 return 0
                 ;;
