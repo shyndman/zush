@@ -1,5 +1,12 @@
+# OpenCode Aliases
+
+LW_MODEL='google/gemini-live-2.5-flash'
+HW_MODEL='openai/gpt-5.1-codex --variant=high'
+
 alias oc='opencode'
 alias occ='opencode --continue'
+alias ocrl="opencode run --model=$LW_MODEL"
+alias ocrh="opencode run --model=$HW_MODEL"
 
 # Queries an LLM, displaying the result with glow
 q() {
