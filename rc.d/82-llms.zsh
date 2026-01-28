@@ -1,6 +1,6 @@
 # OpenCode Aliases
 
-LW_MODEL='google/gemini-live-2.5-flash'
+LW_MODEL='google/gemini-lite-2.5-flash'
 HW_MODEL='openai/gpt-5.1-codex --variant=high'
 
 alias oc='opencode'
