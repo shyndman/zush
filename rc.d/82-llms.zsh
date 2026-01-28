@@ -15,23 +15,23 @@ q() {
     return 1
   fi
 
-  local response status
+  local response exit_status
   response=$(llm -o web_search 1 "$@" 2>&1)
-  status=$?
+  exit_status=$?
 
-  if [ $status -ne 0 ] && [[ $response == *"Error: Web search is not supported by model"* ]]; then
+  if [ $exit_status -ne 0 ] && [[ $response == *"Error: Web search is not supported by model"* ]]; then
     response=$(llm "$@" 2>&1)
-    status=$?
+    exit_status=$?
   fi
 
-  if [ $status -eq 0 ]; then
+  if [ $exit_status -eq 0 ]; then
     printf '%s' "$response" | glow
     echo -e "Continue conversation with: \033[1;37mllm chat --continue\033[0m"
   else
     printf '%s' "$response" >&2
   fi
 
-  return $status
+  return $exit_status
 }
 
 # Provide a ctrl+\ shortcut that attempts to generate your shell command
