@@ -8,7 +8,9 @@ alias occ='opencode --continue'
 alias ocrl="opencode run --model=$LW_MODEL"
 alias ocrh="opencode run --model=$HW_MODEL"
 
-# Queries an LLM, displaying the result with glow
+# Queries an LLM, displaying the result with glow.
+# Uses llm-tools-exa package (https://github.com/daturkel/llm-tools-exa)
+# with -T Exa to provide web search, get_answer, and get_contents tools.
 q() {
   if [ -z "$1" ]; then
     echo "Usage: ask \"<prompt>\"" >&2
@@ -16,13 +18,8 @@ q() {
   fi
 
   local response exit_status
-  response=$(llm -o web_search 1 "$@" 2>&1)
+  response=$(llm -T Exa "$@" 2>&1)
   exit_status=$?
-
-  if [ $exit_status -ne 0 ] && [[ $response == *"Error: Web search is not supported by model"* ]]; then
-    response=$(llm "$@" 2>&1)
-    exit_status=$?
-  fi
 
   if [ $exit_status -eq 0 ]; then
     printf '%s' "$response" | glow
