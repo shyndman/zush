@@ -27,20 +27,20 @@ log_error() { echo -e "${RED}✗${NC} $*"; }
 
 # Shell detection with insults
 check_shell() {
-    if [[ -n "$BASH_VERSION" ]] || [[ "$0" =~ bash$ ]]; then
+    if [[ -n $BASH_VERSION ]] || [[ $0 =~ bash$ ]]; then
         log_error "You moron! This is a ZSH configuration installer."
         echo "   Run it properly: ${YELLOW}curl -fsSL <url> | zsh${NC}"
         exit 1
     fi
 
-    if [[ -n "$SH_VERSION" ]] || [[ "$0" =~ /sh$ ]]; then
+    if [[ -n $SH_VERSION ]] || [[ $0 =~ /sh$ ]]; then
         log_error "You moron! This is a ZSH configuration installer."
         echo "   Run it properly: ${YELLOW}curl -fsSL <url> | zsh${NC}"
         exit 1
     fi
 
     # Check if we're actually running in zsh
-    if [[ -z "$ZSH_VERSION" ]]; then
+    if [[ -z $ZSH_VERSION ]]; then
         log_error "This script must be run with zsh!"
         echo "   Try: ${YELLOW}curl -fsSL <url> | zsh${NC}"
         exit 1
@@ -212,7 +212,7 @@ install_hishtory() {
             log_info "Installing hishtory..."
             echo -n "   Please enter your hishtory secret: "
             read -r secret </dev/tty
-            if [[ -n "$secret" ]]; then
+            if [[ -n $secret ]]; then
                 export HISHTORY_INSTALL_SECRET="$secret"
                 curl https://hishtory.dev/install.py | python3 -
                 hishtory init
@@ -261,6 +261,7 @@ install_llm_plugins() {
     local llm_plugins=(
         "llm-gemini"
         "llm-anthropic"
+        "llm-tools-exa"
         "git+https://github.com/shyndman/llm-complete-command.git"
     )
 
@@ -416,7 +417,7 @@ install_brew_tool() {
 
 # Handle existing installation
 handle_existing_installation() {
-    if [[ -d "$ZUSH_DIR" ]]; then
+    if [[ -d $ZUSH_DIR ]]; then
         log_warning "Zush is already installed at $ZUSH_DIR"
         echo -n "   Remove existing installation and reinstall? [y/N] "
         read -r response </dev/tty 2>/dev/null || response=""
@@ -435,7 +436,7 @@ handle_existing_installation() {
 
 # Backup existing .zshenv
 backup_zshenv() {
-    if [[ -f "$ZSHENV_FILE" ]]; then
+    if [[ -f $ZSHENV_FILE ]]; then
         local backup_file="${ZSHENV_FILE}.old"
 
         log_warning "Existing .zshenv file detected: $ZSHENV_FILE"
@@ -455,7 +456,7 @@ backup_zshenv() {
             ;;
         esac
 
-        if [[ -f "$backup_file" ]]; then
+        if [[ -f $backup_file ]]; then
             log_warning "Backup file already exists: $backup_file"
             echo -n "   Overwrite existing .zshenv.old backup? [y/N] "
             read -r response </dev/tty 2>/dev/null || response=""
@@ -491,7 +492,7 @@ install_zshenv() {
     log_info "Installing .zshenv..."
 
     local source_zshenv="$ZUSH_DIR/home/.zshenv"
-    if [[ ! -f "$source_zshenv" ]]; then
+    if [[ ! -f $source_zshenv ]]; then
         log_error "Source .zshenv not found: $source_zshenv"
         exit 1
     fi
@@ -506,7 +507,7 @@ install_zshenv() {
 check_starship_config() {
     log_info "Checking starship configuration..."
 
-    if [[ ! -d "$STARSHIP_DIR" ]]; then
+    if [[ ! -d $STARSHIP_DIR ]]; then
         log_warning "Starship config directory not found: $STARSHIP_DIR"
         echo "   Instant prompts will not work without starship configuration."
         echo "   Set up starship first: https://starship.rs/config/"
@@ -514,7 +515,7 @@ check_starship_config() {
     fi
 
     local starship_config="$STARSHIP_DIR/starship.toml"
-    if [[ ! -f "$starship_config" ]]; then
+    if [[ ! -f $starship_config ]]; then
         log_warning "Starship config not found: $starship_config"
         echo "   Instant prompts will not work without starship configuration."
         return
@@ -522,7 +523,7 @@ check_starship_config() {
 
     # Create instant-starship.toml if it doesn't exist
     local instant_config="$STARSHIP_DIR/instant-starship.toml"
-    if [[ ! -f "$instant_config" ]]; then
+    if [[ ! -f $instant_config ]]; then
         log_info "Creating instant starship configuration..."
         echo -n "   Create instant-starship.toml for faster prompts? [Y/n] "
         read -r response </dev/tty 2>/dev/null || response=""
@@ -599,7 +600,7 @@ create_zushrc() {
     echo "  • Stays out of version control"
     echo ""
 
-    if [[ -f "$zushrc_file" ]]; then
+    if [[ -f $zushrc_file ]]; then
         log_info "~/.zushrc already exists, skipping creation"
         return
     fi
@@ -673,7 +674,7 @@ rollback() {
     log_error "Installation failed, rolling back..."
 
     # Remove Zush directory
-    [[ -d "$ZUSH_DIR" ]] && rm -rf "$ZUSH_DIR"
+    [[ -d $ZUSH_DIR ]] && rm -rf "$ZUSH_DIR"
 
     # Restore .zshenv backup
     if [[ -f "${ZSHENV_FILE}.old" ]]; then
