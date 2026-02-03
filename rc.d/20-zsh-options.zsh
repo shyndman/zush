@@ -8,6 +8,7 @@ setopt nonomatch            # hide error message if there is no match for the pa
 # Interactive features
 setopt interactivecomments  # allow comments in interactive mode
 setopt notify               # report the status of background jobs immediately
+setopt HIST_IGNORE_SPACE    # commands with leading spaces are not written to history
 
 # Globbing and expansion
 setopt extended_glob        # enable extended globbing
