@@ -12,13 +12,73 @@ alias ocrh="opencode run --model=$HW_MODEL"
 # Uses llm-tools-exa package (https://github.com/daturkel/llm-tools-exa)
 # with -T Exa to provide web search, get_answer, and get_contents tools.
 q() {
-  if [ -z "$1" ]; then
-    echo "Usage: ask \"<prompt>\"" >&2
+  if [ $# -eq 0 ]; then
+    echo "Usage: q [llm args] -- \"<prompt>\"" >&2
     return 1
   fi
 
+  local -a passthrough_args=()
+
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      --)
+        shift
+        break
+        ;;
+      -* )
+        passthrough_args+=("$1")
+        shift
+        if [ $# -gt 0 ] && [ "$1" != "--" ] && [[ "$1" != -* ]]; then
+          passthrough_args+=("$1")
+          shift
+        fi
+        ;;
+      * )
+        break
+        ;;
+    esac
+  done
+
+  if [ $# -eq 0 ]; then
+    echo "Usage: q [llm args] -- \"<prompt>\"" >&2
+    return 1
+  fi
+
+  local user_prompt="$*"
+  local kernel_release os_release
+
+  if ! kernel_release=$(uname -r 2>/dev/null); then
+    kernel_release="unknown"
+  fi
+
+  if ! os_release=$(cat /etc/os-release 2>/dev/null); then
+    os_release="unknown"
+  fi
+
+  local contextual_prompt
+  contextual_prompt=$(printf 'System context:\n  Kernel: %s\n  /etc/os-release:\n%s\n\nUser request:\n%s\n' \
+    "$kernel_release" "$os_release" "$user_prompt")
+
+  local add_system_prompt=1 arg
+  for arg in "${passthrough_args[@]}"; do
+    case "$arg" in
+      -s|--system|--system=*)
+        add_system_prompt=0
+        break
+        ;;
+    esac
+  done
+
+  local -a llm_cmd=(llm -T Exa)
+
+  if [ $add_system_prompt -eq 1 ]; then
+    llm_cmd+=(--system "Please answer concisely.")
+  fi
+
+  llm_cmd+=("${passthrough_args[@]}")
+
   local response exit_status
-  response=$(llm -T Exa "$@" 2>&1)
+  response=$(printf '%s' "$contextual_prompt" | "${llm_cmd[@]}" 2>&1)
   exit_status=$?
 
   if [ $exit_status -eq 0 ]; then
