@@ -7,6 +7,34 @@ typeset -g ZUSH_UPDATE_CHECK_INTERVAL=${ZUSH_UPDATE_CHECK_INTERVAL:-1}  # days
 typeset -g ZUSH_UPDATE_CHECK_FILE="${ZUSH_CACHE_DIR}/last-update-check"
 typeset -g ZUSH_UPDATE_AVAILABLE_FILE="${ZUSH_CACHE_DIR}/update-available"
 
+# Reload the current interactive shell with fresh Zush config
+_zush_reload_shell() {
+    # Require an interactive session with a TTY
+    [[ ! -o interactive || ! -t 1 ]] && return 1
+
+    local shell_bin="${ZSH_BINARY:-}" \
+        shell_path=""
+
+    if [[ -n "$shell_bin" && -x "$shell_bin" ]]; then
+        shell_path="$shell_bin"
+    else
+        shell_path="$(command -v zsh 2>/dev/null)" || return 1
+    fi
+
+    [[ -z "$shell_path" ]] && return 1
+
+    echo "   Reloading shell with latest Zush..."
+    exec -l "$shell_path"
+}
+
+# Public command to reload Zush on demand
+reload-zush() {
+    if ! _zush_reload_shell; then
+        echo "🦥 Unable to reload automatically. Restart your shell instead." >&2
+        return 1
+    fi
+}
+
 # Check if we should run background update check
 _zush_should_background_check() {
     # Skip if disabled
@@ -109,8 +137,10 @@ _zush_do_update() {
             cd "$ZUSH_HOME" || return 1
             if git pull --quiet 2>/dev/null; then
                 echo "   ✅ Zush updated successfully!"
-                echo "   Restart your shell to use the latest version."
                 rm -f "$ZUSH_UPDATE_AVAILABLE_FILE"
+                if ! _zush_reload_shell; then
+                    echo "   Restart your shell to use the latest version."
+                fi
             else
                 echo "   ⚠️  Update failed. Try manually: cd ~/.config/zush && git pull"
             fi
