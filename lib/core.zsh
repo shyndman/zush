@@ -21,6 +21,7 @@ zush_debug() {
 
 # Error handling
 zush_error() {
+    typeset -g _ZUSH_STARTUP_ERROR=1
     echo "[ZUSH ERROR] ${funcstack[2]:-unknown}:${funcfiletrace[1]##*:}: $*" >&2
 }
 

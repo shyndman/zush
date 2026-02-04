@@ -4,6 +4,7 @@
 
 # Configuration
 typeset -g ZUSH_INSTANT_STARSHIP_CONFIG="${HOME}/.config/starship/instant-starship.toml"
+typeset -g ZUSH_PROMPT_WAIT_MESSAGE="Startup errors detected. Press any key to continue..."
 
 # Show instant prompt if conditions are met
 _zush_show_instant_prompt() {
@@ -56,4 +57,25 @@ _zush_handoff_to_real_prompt() {
     unset _ZUSH_INSTANT_PROMPT_SHOWN
 
     zush_debug "Handed off to real starship prompt"
+}
+
+_zush_wait_before_handoff_if_needed() {
+    (( ${+functions[_zush_handoff_to_real_prompt]} )) || return
+
+    if [[ "${_ZUSH_INSTANT_PROMPT_SHOWN:-0}" == "1" && "${_ZUSH_STARTUP_ERROR:-0}" == "1" ]]; then
+        print -r -- ""
+        print -r -- "$ZUSH_PROMPT_WAIT_MESSAGE"
+
+        local _zush_key
+        if [[ -n "${ZUSH_PROMPT_WAIT_TEST_INPUT:-}" ]]; then
+            _zush_key="$ZUSH_PROMPT_WAIT_TEST_INPUT"
+        else
+            read -sk 1 _zush_key
+        fi
+        print -r -- ""
+
+        unset _ZUSH_STARTUP_ERROR
+    fi
+
+    _zush_handoff_to_real_prompt
 }

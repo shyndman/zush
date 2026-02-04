@@ -74,7 +74,9 @@ if (( ${+functions[_zushc_bg]} )); then
 fi
 
 # Hand off instant prompt to real starship
-if (( ${+functions[_zush_handoff_to_real_prompt]} )); then
+if (( ${+functions[_zush_wait_before_handoff_if_needed]} )); then
+    _zush_wait_before_handoff_if_needed
+elif (( ${+functions[_zush_handoff_to_real_prompt]} )); then
     _zush_handoff_to_real_prompt
 fi
 
