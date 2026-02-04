@@ -13,17 +13,30 @@ typeset -g ZUSH_PLUGINS_MANIFEST="${ZUSH_CACHE_DIR:-$HOME/.cache/zush}/plugins-m
 # Find the main plugin file in a repository (or nested directory)
 # Parameters:
 #   $1: plugin_dir - directory containing the plugin repository
-#   $2: target_path - optional relative or absolute path to a file or directory
+#   $2: target_path - optional path relative to plugin repo root (leading '/' keeps repo-root scope)
 # Returns: 0 on success (prints plugin file path), 1 if no plugin file found
 _zushp_find_plugin_file() {
     local plugin_dir="$1"
     local target_path="$2"
     local search_dir="$plugin_dir"
     local candidate
+    local plugin_dir_abs="${plugin_dir:A}"
 
     if [[ -n "$target_path" ]]; then
-        candidate="$target_path"
-        [[ "$candidate" != /* ]] && candidate="${plugin_dir}/${candidate}"
+        if [[ "$target_path" == /* ]]; then
+            candidate="${plugin_dir}/${target_path#/}"
+        else
+            candidate="${plugin_dir}/${target_path}"
+        fi
+        candidate="${candidate:A}"
+
+        case "$candidate" in
+            "$plugin_dir_abs"|"$plugin_dir_abs"/*) ;;
+            *)
+                zush_error "Plugin path '${target_path}' escapes $plugin_dir"
+                return 1
+                ;;
+        esac
 
         if [[ -f "$candidate" ]]; then
             echo "${candidate:A}"
@@ -111,7 +124,7 @@ _zushp_add_to_manifest() {
 #   $1: user_repo - GitHub repository in 'user/repo' format (required)
 #       - user: alphanumeric, underscores, hyphens [a-zA-Z0-9_-]+
 #       - repo: alphanumeric, underscores, hyphens, dots [a-zA-Z0-9_.-]+
-#   $2: plugin_path - optional relative/absolute path to plugin directory or file
+#   $2: plugin_path - optional path relative to the plugin repo root (leading '/' starts at repo root)
 # Returns: 0 on success, 1 on validation or installation failure
 zushp() {
     local user_repo="$1"
