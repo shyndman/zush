@@ -10,26 +10,45 @@ typeset -g ZUSH_PLUGINS_MANIFEST="${ZUSH_CACHE_DIR:-$HOME/.cache/zush}/plugins-m
 [[ ! -d "${ZUSH_PLUGINS_DIR}" ]] && mkdir -p "${ZUSH_PLUGINS_DIR}" 2>/dev/null
 
 # Function: _zushp_find_plugin_file
-# Find the main plugin file in a repository
+# Find the main plugin file in a repository (or nested directory)
 # Parameters:
 #   $1: plugin_dir - directory containing the plugin repository
+#   $2: target_path - optional relative or absolute path to a file or directory
 # Returns: 0 on success (prints plugin file path), 1 if no plugin file found
 _zushp_find_plugin_file() {
     local plugin_dir="$1"
-    local repo_name="${plugin_dir:t}"
+    local target_path="$2"
+    local search_dir="$plugin_dir"
+    local candidate
+
+    if [[ -n "$target_path" ]]; then
+        candidate="$target_path"
+        [[ "$candidate" != /* ]] && candidate="${plugin_dir}/${candidate}"
+
+        if [[ -f "$candidate" ]]; then
+            echo "${candidate:A}"
+            return 0
+        elif [[ -d "$candidate" ]]; then
+            search_dir="$candidate"
+        else
+            return 1
+        fi
+    fi
+
+    local repo_name="${search_dir:t}"
     
     # Check for common plugin file patterns in order of preference
     local patterns=(
-        "${plugin_dir}/${repo_name}.plugin.zsh"
-        "${plugin_dir}/plugin.zsh"
-        "${plugin_dir}/${repo_name}.zsh"
-        "${plugin_dir}/init.zsh"
-        "${plugin_dir}"/*.plugin.zsh(N[1])
-        "${plugin_dir}"/*.zsh(N[1])
+        "${search_dir}/${repo_name}.plugin.zsh"
+        "${search_dir}/plugin.zsh"
+        "${search_dir}/${repo_name}.zsh"
+        "${search_dir}/init.zsh"
+        "${search_dir}"/*.plugin.zsh(N[1])
+        "${search_dir}"/*.zsh(N[1])
     )
     
     for pattern in "${patterns[@]}"; do
-        [[ -f "$pattern" ]] && { echo "$pattern"; return 0; }
+        [[ -f "$pattern" ]] && { echo "${pattern:A}"; return 0; }
     done
     
     return 1
@@ -92,13 +111,15 @@ _zushp_add_to_manifest() {
 #   $1: user_repo - GitHub repository in 'user/repo' format (required)
 #       - user: alphanumeric, underscores, hyphens [a-zA-Z0-9_-]+
 #       - repo: alphanumeric, underscores, hyphens, dots [a-zA-Z0-9_.-]+
+#   $2: plugin_path - optional relative/absolute path to plugin directory or file
 # Returns: 0 on success, 1 on validation or installation failure
 zushp() {
     local user_repo="$1"
+    local plugin_path="$2"
 
     # Validate user/repo format
     if [[ -z "$user_repo" ]]; then
-        zush_error "Usage: zushp <user/repo> (got: '$user_repo')"
+        zush_error "Usage: zushp <user/repo> [plugin-path] (got: '$user_repo')"
         return 1
     fi
 
@@ -117,8 +138,12 @@ zushp() {
     
     # Find plugin file
     local plugin_file
-    if ! plugin_file=$(_zushp_find_plugin_file "$plugin_dir"); then
-        zush_error "No plugin file found in $plugin_dir"
+    if ! plugin_file=$(_zushp_find_plugin_file "$plugin_dir" "$plugin_path"); then
+        if [[ -n "$plugin_path" ]]; then
+            zush_error "No plugin file found at '$plugin_path' inside $plugin_dir"
+        else
+            zush_error "No plugin file found in $plugin_dir"
+        fi
         return 1
     fi
     
@@ -185,4 +210,3 @@ _zushp_clean() {
         echo "Cancelled"
     fi
 }
-
