@@ -110,6 +110,7 @@ install_tools() {
         git-delta
         go-task
         imagemagick
+        moor
         opencode
         procs
         ripgrep
