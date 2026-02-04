@@ -120,17 +120,11 @@ install_tools() {
         install_brew_tool "$tool"
     done
 
-    # Special handling for fzf (may need build-from-source on arm64)
-    install_fzf
-
-    # Special handling for glow (may need build-from-source on arm64)
-    install_glow
-
-    # Special handling for direnv (may need build-from-source on arm64)
-    install_direnv
-
-    # Special handling for neovim (may need build-from-source on arm64)
-    install_neovim
+    # Tools that may need build-from-source on arm64
+    install_brew_tool_with_source "fzf"
+    install_brew_tool_with_source "glow"
+    install_brew_tool_with_source "direnv"
+    install_brew_tool_with_source "neovim"
 
     log_success "Tool dependency check complete."
 }
@@ -276,130 +270,6 @@ install_llm_plugins() {
             fi
         fi
     done
-}
-
-install_fzf() {
-    # Early return if already installed
-    if command -v fzf >/dev/null 2>&1; then
-        return 0
-    fi
-
-    # Early return if user declines
-    if ! confirm_install "fzf"; then
-        return 0
-    fi
-
-    log_info "Installing fzf via Homebrew..."
-
-    # Try normal install first, return early if successful
-    if brew install fzf 2>/dev/null; then
-        log_success "fzf installed."
-        return 0
-    fi
-
-    # Fallback to build-from-source
-    log_warning "Standard fzf installation failed (likely no bottle for arm64)."
-    log_info "Attempting to build fzf from source (this may take a few minutes)..."
-    if brew install --build-from-source fzf; then
-        log_success "fzf installed from source."
-        return 0
-    fi
-
-    log_error "Failed to install fzf even from source."
-    return 1
-}
-
-install_glow() {
-    # Early return if already installed
-    if command -v glow >/dev/null 2>&1; then
-        return 0
-    fi
-
-    # Early return if user declines
-    if ! confirm_install "glow"; then
-        return 0
-    fi
-
-    log_info "Installing glow via Homebrew..."
-
-    # Try normal install first, return early if successful
-    if brew install glow 2>/dev/null; then
-        log_success "glow installed."
-        return 0
-    fi
-
-    # Fallback to build-from-source
-    log_warning "Standard glow installation failed (likely no bottle for arm64)."
-    log_info "Attempting to build glow from source (this may take a few minutes)..."
-    if brew install --build-from-source glow; then
-        log_success "glow installed from source."
-        return 0
-    fi
-
-    log_error "Failed to install glow even from source."
-    return 1
-}
-
-install_direnv() {
-    # Early return if already installed
-    if command -v direnv >/dev/null 2>&1; then
-        return 0
-    fi
-
-    # Early return if user declines
-    if ! confirm_install "direnv"; then
-        return 0
-    fi
-
-    log_info "Installing direnv via Homebrew..."
-
-    # Try normal install first, return early if successful
-    if brew install direnv 2>/dev/null; then
-        log_success "direnv installed."
-        return 0
-    fi
-
-    # Fallback to build-from-source
-    log_warning "Standard direnv installation failed (likely no bottle for arm64)."
-    log_info "Attempting to build direnv from source (this may take a few minutes)..."
-    if brew install --build-from-source direnv; then
-        log_success "direnv installed from source."
-        return 0
-    fi
-
-    log_error "Failed to install direnv even from source."
-    return 1
-}
-
-install_neovim() {
-    # Early return if already installed
-    if command -v nvim >/dev/null 2>&1; then
-        return 0
-    fi
-
-    # Early return if user declines
-    if ! confirm_install "neovim"; then
-        return 0
-    fi
-
-    log_info "Installing neovim via Homebrew..."
-
-    # Try normal install first, return early if successful
-    if brew install neovim 2>/dev/null; then
-        log_success "neovim installed."
-        return 0
-    fi
-
-    # Fallback to build-from-source
-    log_warning "Standard neovim installation failed (likely no bottle for arm64)."
-    log_info "Attempting to build neovim from source (this may take a few minutes)..."
-    if brew install --build-from-source neovim; then
-        log_success "neovim installed from source."
-        return 0
-    fi
-
-    log_error "Failed to install neovim even from source."
-    return 1
 }
 
 install_brew_tool() {
