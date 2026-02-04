@@ -1,4 +1,10 @@
 # Better reading tools configuration
+
+# Sets Moor as our pager
+
+export MOOR='--no-linenumbers'
+export PAGER="$(which moor)"
+
 # Sets up bat and bat-extras for enhanced terminal reading experience
 
 # Require bat
