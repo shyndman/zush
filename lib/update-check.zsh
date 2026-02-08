@@ -8,12 +8,14 @@ typeset -g ZUSH_UPDATE_CHECK_FILE="${ZUSH_CACHE_DIR}/last-update-check"
 typeset -g ZUSH_UPDATE_AVAILABLE_FILE="${ZUSH_CACHE_DIR}/update-available"
 
 # Reload the current interactive shell with fresh Zush config
+# Optional: pass directory to change to before exec
 _zush_reload_shell() {
     # Require an interactive session with a TTY
     [[ ! -o interactive || ! -t 1 ]] && return 1
 
     local shell_bin="${ZSH_BINARY:-}" \
-        shell_path=""
+        shell_path="" \
+        target_dir="${1:-}"
 
     if [[ -n "$shell_bin" && -x "$shell_bin" ]]; then
         shell_path="$shell_bin"
@@ -22,6 +24,11 @@ _zush_reload_shell() {
     fi
 
     [[ -z "$shell_path" ]] && return 1
+
+    # Change to target directory if provided
+    if [[ -n "$target_dir" && -d "$target_dir" ]]; then
+        cd "$target_dir" 2>/dev/null || true
+    fi
 
     echo "   Reloading shell with latest Zush..."
     exec -l "$shell_path"
@@ -138,7 +145,7 @@ _zush_do_update() {
             if git pull --quiet 2>/dev/null; then
                 echo "   ✅ Zush updated successfully!"
                 rm -f "$ZUSH_UPDATE_AVAILABLE_FILE"
-                if ! _zush_reload_shell; then
+                if ! _zush_reload_shell "$current_dir"; then
                     echo "   Restart your shell to use the latest version."
                 fi
             else
