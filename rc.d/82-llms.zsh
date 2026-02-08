@@ -115,23 +115,67 @@ zle -N __llm_cmdcomp
 # Launch OpenCode with a Firefox DevTools MCP for browser debugging.
 # All arguments are passed through to the opencode binary.
 #
-# Usage: opencode-firefox [opencode args...]
+# Usage: opencode-firefox [--url <browser-url>] [opencode args...]
+#
+# Options:
+#   --url <url>  Connect to an already-running browser at this URL (e.g.
+#                http://localhost:9222). Skips launching Firefox.
 #
 # This function:
-#   1. Finds an available port for Firefox remote debugging
-#   2. Launches Firefox with remote debugging enabled
+#   1. Finds an available port for Firefox remote debugging (or uses --url)
+#   2. Launches Firefox with remote debugging enabled (unless --url given)
 #   3. Passes MCP config via OPENCODE_CONFIG_CONTENT env var
 #   4. Invokes opencode with any provided arguments
-#   5. Cleans up the browser on exit
+#   5. Cleans up the browser on exit (unless --url given)
 opencode-firefox() {
     local FIREFOX_DEBUG_PORT_MIN=9222
     local FIREFOX_DEBUG_PORT_MAX=9322
 
-    local id port mcp_name user_data_dir firefox_pid mcp_config
+    local browser_url="" id port mcp_name user_data_dir firefox_pid mcp_config
+
+    # Parse our own options, leaving the rest for opencode
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --url)
+                browser_url="$2"
+                shift 2
+                ;;
+            --url=*)
+                browser_url="${1#--url=}"
+                shift
+                ;;
+            *)
+                break
+                ;;
+        esac
+    done
 
     # Generate short random identifier (3 hex chars)
     id=$(head -c 2 /dev/urandom | xxd -p | head -c 3)
     mcp_name="firefox-${id}"
+
+    if [[ -n "$browser_url" ]]; then
+        # Connect to an existing browser — no launch, no cleanup
+        mcp_config=$(jq -n \
+            --arg name "$mcp_name" \
+            --arg url "$browser_url" \
+            '{
+                "$schema": "https://opencode.ai/config.json",
+                "mcp": {
+                    ($name): {
+                        "type": "local",
+                        "command": ["npx", "-y", "chrome-devtools-mcp@latest", "--browserUrl=\($url)"]
+                    }
+                }
+            }')
+
+        echo "Connecting to existing browser at ${browser_url}" >&2
+        echo "MCP server: ${mcp_name}" >&2
+
+        OPENCODE_CONFIG_CONTENT="$mcp_config" opencode "$@"
+        return $?
+    fi
+
     user_data_dir="/tmp/opencode-firefox-debug-${id}"
 
     # Find an available port in the range
