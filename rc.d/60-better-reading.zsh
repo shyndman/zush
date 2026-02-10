@@ -1,5 +1,11 @@
 # Better reading tools configuration
 
+# Preview markdown in browser
+mdp() {
+  local tmp=$(mktemp /tmp/mdpreview-XXXX.html)
+  pandoc -s --metadata title="${1:t:r}" -t html "$1" -o "$tmp" && xdg-open "$tmp"
+}
+
 # Sets Moor as our pager
 
 export MOOR='--no-linenumbers'
