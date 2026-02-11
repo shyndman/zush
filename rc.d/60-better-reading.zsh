@@ -2,8 +2,40 @@
 
 # Preview markdown in browser
 mdp() {
-  local tmp=$(mktemp /tmp/mdpreview-XXXX.html)
-  pandoc -s --metadata title="${1:t:r}" -t html "$1" -o "$tmp" && xdg-open "$tmp"
+    local source_file="$1"
+    local zush_home="${ZUSH_HOME:-${ZDOTDIR:-$HOME/.config/zush}}"
+    local diagram_filter="${zush_home}/vendor/pandoc-ext/diagram/_extensions/diagram/diagram.lua"
+    local preview_css="${zush_home}/assets/mdp-preview.css"
+    local mermaid_bin="${commands[mmdc]:-${zush_home}/scripts/mmdc-wrapper.sh}"
+    local preview_file
+
+    if [[ -z "$source_file" || ! -f "$source_file" ]]; then
+        zush_error "Usage: mdp <markdown-file>"
+        return 1
+    fi
+
+    [[ -f "$diagram_filter" ]] || {
+        zush_error "Missing diagram filter: $diagram_filter"
+        return 1
+    }
+    [[ -f "$preview_css" ]] || {
+        zush_error "Missing preview CSS: $preview_css"
+        return 1
+    }
+    [[ -x "$mermaid_bin" ]] || {
+        zush_error "Mermaid binary is not executable: $mermaid_bin"
+        return 1
+    }
+
+    preview_file=$(mktemp /tmp/mdpreview-XXXX.html) || return 1
+
+    MERMAID_BIN="$mermaid_bin" pandoc \
+        --standalone \
+        --embed-resources \
+        --css "$preview_css" \
+        --lua-filter "$diagram_filter" \
+        --metadata title="${source_file:t:r}" \
+        -t html "$source_file" -o "$preview_file" && xdg-open "$preview_file"
 }
 
 # Sets Moor as our pager

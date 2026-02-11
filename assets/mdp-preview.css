@@ -1,0 +1,103 @@
+:root {
+    --mdp-bg: #f4efe6;
+    --mdp-surface: #fbf8f2;
+    --mdp-border: #d9cebe;
+    --mdp-text: #23303b;
+    --mdp-muted: #5e6c76;
+    --mdp-accent: #0f766e;
+    --mdp-code-bg: #ece3d7;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    padding: 3rem 1.25rem 4rem;
+    background:
+        radial-gradient(circle at 90% 10%, #dfeeea 0%, transparent 40%),
+        radial-gradient(circle at 5% 85%, #efe4d2 0%, transparent 35%),
+        var(--mdp-bg);
+    color: var(--mdp-text);
+    font: 1.08rem/1.7 "Source Serif 4", Charter, "Iowan Old Style", Georgia, serif;
+}
+
+body > * {
+    margin-inline: auto;
+    max-width: 78ch;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    color: #15202b;
+    font-family: "Fraunces", "Palatino Linotype", Palatino, serif;
+    letter-spacing: 0.02em;
+    line-height: 1.25;
+    margin-top: 1.8em;
+    margin-bottom: 0.55em;
+}
+
+h1,
+h2 {
+    border-bottom: 1px solid var(--mdp-border);
+    padding-bottom: 0.22em;
+}
+
+a {
+    color: var(--mdp-accent);
+    text-decoration-thickness: 0.09em;
+    text-underline-offset: 0.18em;
+}
+
+code,
+kbd,
+samp {
+    font-family: "Iosevka Term", "JetBrains Mono", "SFMono-Regular", monospace;
+    font-size: 0.92em;
+}
+
+pre {
+    margin: 1.2rem 0;
+    padding: 0.95rem 1rem;
+    border: 1px solid var(--mdp-border);
+    border-radius: 10px;
+    background: var(--mdp-code-bg);
+    overflow-x: auto;
+}
+
+pre code {
+    background: transparent;
+}
+
+blockquote {
+    margin: 1rem 0;
+    padding: 0.2rem 0.95rem;
+    border-left: 0.3rem solid var(--mdp-border);
+    color: var(--mdp-muted);
+    background: color-mix(in srgb, var(--mdp-surface) 75%, transparent);
+}
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+th,
+td {
+    border: 1px solid var(--mdp-border);
+    padding: 0.5rem 0.6rem;
+}
+
+img,
+svg {
+    display: block;
+    height: auto;
+    margin: 1.3rem auto;
+    max-width: 100%;
+}
