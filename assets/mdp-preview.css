@@ -6,6 +6,7 @@
     --mdp-muted: #5e6c76;
     --mdp-accent: #0f766e;
     --mdp-code-bg: #ece3d7;
+    --mdp-content-width: 42rem;
 }
 
 * {
@@ -24,11 +25,55 @@ body {
     font: 1.08rem/1.7 "Source Serif 4", Charter, "Iowan Old Style", Georgia, serif;
 }
 
-body > * {
-    margin-inline: auto;
-    max-width: 78ch;
+/* Content width constraint - all block elements */
+body > header,
+body > h1,
+body > h2,
+body > h3,
+body > h4,
+body > h5,
+body > h6,
+body > p,
+body > ul,
+body > ol,
+body > dl,
+body > pre,
+body > blockquote,
+body > table,
+body > figure,
+body > hr,
+body > div,
+body > section,
+body > article {
+    max-width: var(--mdp-content-width);
+    margin-left: auto;
+    margin-right: auto;
 }
 
+/* Pandoc title block header */
+header#title-block-header {
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--mdp-border);
+}
+
+header#title-block-header h1 {
+    margin-top: 0;
+}
+
+header#title-block-header .subtitle {
+    font-size: 1.15rem;
+    color: var(--mdp-muted);
+    margin-top: -0.5rem;
+}
+
+header#title-block-header .author,
+header#title-block-header .date {
+    color: var(--mdp-muted);
+    font-size: 0.95rem;
+}
+
+/* Headings */
 h1,
 h2,
 h3,
@@ -43,18 +88,15 @@ h6 {
     margin-bottom: 0.55em;
 }
 
-h1,
-h2 {
-    border-bottom: 1px solid var(--mdp-border);
-    padding-bottom: 0.22em;
-}
 
+/* Links */
 a {
     color: var(--mdp-accent);
     text-decoration-thickness: 0.09em;
     text-underline-offset: 0.18em;
 }
 
+/* Code */
 code,
 kbd,
 samp {
@@ -62,8 +104,15 @@ samp {
     font-size: 0.92em;
 }
 
+:not(pre) > code {
+    background: var(--mdp-code-bg);
+    padding: 0.15em 0.35em;
+    border-radius: 4px;
+}
+
 pre {
-    margin: 1.2rem 0;
+    margin-top: 1.2rem;
+    margin-bottom: 1.2rem;
     padding: 0.95rem 1rem;
     border: 1px solid var(--mdp-border);
     border-radius: 10px;
@@ -73,16 +122,62 @@ pre {
 
 pre code {
     background: transparent;
+    padding: 0;
 }
 
+/* Pandoc wraps code blocks in div.sourceCode - override its margin reset */
+div.sourceCode {
+    max-width: var(--mdp-content-width);
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Blockquotes */
 blockquote {
-    margin: 1rem 0;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
     padding: 0.2rem 0.95rem;
     border-left: 0.3rem solid var(--mdp-border);
     color: var(--mdp-muted);
     background: color-mix(in srgb, var(--mdp-surface) 75%, transparent);
 }
 
+blockquote > * {
+    max-width: none;
+}
+
+/* Lists */
+ul,
+ol {
+    padding-left: 1.5rem;
+}
+
+li {
+    margin: 0.3em 0;
+}
+
+li > ul,
+li > ol {
+    margin: 0.3em 0;
+}
+
+dl {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.4rem 1rem;
+}
+
+dt {
+    font-weight: 600;
+    grid-column: 1;
+}
+
+dd {
+    margin: 0;
+    grid-column: 2;
+}
+
+/* Tables */
 table {
     border-collapse: collapse;
     width: 100%;
@@ -92,6 +187,35 @@ th,
 td {
     border: 1px solid var(--mdp-border);
     padding: 0.5rem 0.6rem;
+    text-align: left;
+}
+
+th {
+    background: var(--mdp-surface);
+    font-weight: 600;
+}
+
+tr:nth-child(even) {
+    background: color-mix(in srgb, var(--mdp-surface) 50%, transparent);
+}
+
+/* Figures and images */
+figure {
+    margin-top: 1.3rem;
+    margin-bottom: 1.3rem;
+}
+
+figure > img,
+figure > svg {
+    margin: 0 auto;
+}
+
+figcaption {
+    margin-top: 0.5rem;
+    text-align: center;
+    font-size: 0.9rem;
+    color: var(--mdp-muted);
+    font-style: italic;
 }
 
 img,
@@ -100,4 +224,53 @@ svg {
     height: auto;
     margin: 1.3rem auto;
     max-width: 100%;
+}
+
+/* Horizontal rule */
+hr {
+    border: none;
+    border-top: 1px solid var(--mdp-border);
+    margin: 2rem auto;
+}
+
+/* Task lists (GitHub-style checkboxes) */
+ul.task-list {
+    list-style: none;
+    padding-left: 0;
+}
+
+li.task-list-item {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+}
+
+li.task-list-item > input[type="checkbox"] {
+    margin: 0;
+}
+
+/* Footnotes */
+section.footnotes {
+    margin-top: 3rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--mdp-border);
+    font-size: 0.9rem;
+}
+
+section.footnotes ol {
+    padding-left: 1.2rem;
+}
+
+/* Table of contents */
+nav#TOC {
+    max-width: var(--mdp-content-width);
+    margin: 0 auto 2rem;
+    padding: 1rem;
+    background: var(--mdp-surface);
+    border: 1px solid var(--mdp-border);
+    border-radius: 8px;
+}
+
+nav#TOC > ul {
+    margin: 0;
 }
