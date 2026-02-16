@@ -1,12 +1,16 @@
 # OpenCode Aliases
 
 LW_MODEL='google/gemini-2.5-flash-lite'
-HW_MODEL='openai/gpt-5.1-codex --variant=high'
+HW_MODEL='openai/gpt-5.1-codex'
+
+alias ompc='omp --continue'
+alias omprl="omp --model=$LW_MODEL"
+alias omprh="omp --model=$HW_MODEL --thinking=high"
 
 alias oc='opencode'
 alias occ='opencode --continue'
 alias ocrl="opencode run --model=$LW_MODEL"
-alias ocrh="opencode run --model=$HW_MODEL"
+alias ocrh="opencode run --model=$HW_MODEL --variant=high"
 
 # Queries an LLM, displaying the result with glow.
 # Uses llm-tools-exa package (https://github.com/daturkel/llm-tools-exa)
