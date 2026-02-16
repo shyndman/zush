@@ -16,10 +16,12 @@ _openspec() {
     'validate:Validate changes and specs'
     'show:Show a change or spec'
     'archive:Archive a completed change and update main specs'
+    'feedback:Submit feedback about OpenSpec'
     'change:Manage OpenSpec change proposals (deprecated)'
     'spec:Manage OpenSpec specifications'
     'completion:Manage shell completions for OpenSpec CLI'
     'config:View and modify global OpenSpec configuration'
+    'schema:Manage workflow schemas'
   )
 
   _arguments -C \
@@ -53,6 +55,9 @@ _openspec() {
         archive)
           _openspec_archive
           ;;
+        feedback)
+          _openspec_feedback
+          ;;
         change)
           _openspec_change
           ;;
@@ -64,6 +69,9 @@ _openspec() {
           ;;
         config)
           _openspec_config
+          ;;
+        schema)
+          _openspec_schema
           ;;
       esac
       ;;
@@ -123,6 +131,12 @@ _openspec_archive() {
     '--skip-specs[Skip spec update operations]' \
     '--no-validate[Skip validation (not recommended)]' \
     '*: :_openspec_complete_changes'
+}
+
+_openspec_feedback() {
+  _arguments \
+    '--body[Detailed description for the feedback]:value:' \
+    '*: :_default'
 }
 
 _openspec_change() {
@@ -382,6 +396,77 @@ _openspec_config_edit() {
   _arguments
 }
 
+_openspec_schema() {
+  local context state line
+  typeset -A opt_args
+
+  local -a subcommands
+  subcommands=(
+    'which:Show where a schema resolves from'
+    'validate:Validate a schema structure and templates'
+    'fork:Copy an existing schema to project for customization'
+    'init:Create a new project-local schema'
+  )
+
+  _arguments -C \
+    "1: :->subcommand" \
+    "*::arg:->args"
+
+  case $state in
+    subcommand)
+      _describe "subcommand" subcommands
+      ;;
+    args)
+      case $words[1] in
+        which)
+          _openspec_schema_which
+          ;;
+        validate)
+          _openspec_schema_validate
+          ;;
+        fork)
+          _openspec_schema_fork
+          ;;
+        init)
+          _openspec_schema_init
+          ;;
+      esac
+      ;;
+  esac
+}
+
+_openspec_schema_which() {
+  _arguments \
+    '--json[Output as JSON]' \
+    '--all[List all schemas with their resolution sources]' \
+    '*: :_default'
+}
+
+_openspec_schema_validate() {
+  _arguments \
+    '--json[Output as JSON]' \
+    '--verbose[Show detailed validation steps]' \
+    '*: :_default'
+}
+
+_openspec_schema_fork() {
+  _arguments \
+    '--json[Output as JSON]' \
+    '--force[Overwrite existing destination]' \
+    '*: :_default'
+}
+
+_openspec_schema_init() {
+  _arguments \
+    '--json[Output as JSON]' \
+    '--description[Schema description]:value:' \
+    '--artifacts[Comma-separated artifact IDs]:value:' \
+    '--default[Set as project default schema]' \
+    '--no-default[Do not prompt to set as default]' \
+    '--force[Overwrite existing schema]' \
+    '*: :_default'
+}
+
 # Dynamic completion helpers
 
 # Use openspec __complete to get available changes
@@ -414,3 +499,4 @@ _openspec_complete_items() {
   _describe "item" items
 }
 compdef _openspec openspec
+
