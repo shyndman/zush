@@ -2,17 +2,41 @@
 
 # Preview markdown in browser
 mdp() {
-    local source_file="$1"
+    local source_arg="$1"
+    local source_file=""
+    local source_title=""
+    local clipboard_file=""
+    local cleanup_source_file=0
     local zush_home="${ZUSH_HOME:-${ZDOTDIR:-$HOME/.config/zush}}"
     local diagram_filter="${zush_home}/vendor/pandoc-ext/diagram/_extensions/diagram/diagram.lua"
     local preview_css="${zush_home}/assets/mdp-preview.css"
     local mermaid_bin="${commands[mmdc]:-${zush_home}/scripts/mmdc-wrapper.sh}"
     local preview_file
 
-    if [[ -z "$source_file" || ! -f "$source_file" ]]; then
-        zush_error "Usage: mdp <markdown-file>"
-        return 1
+    if [[ -n "$source_arg" ]]; then
+        if [[ ! -f "$source_arg" ]]; then
+            zush_error "Markdown file not found: $source_arg"
+            return 1
+        fi
+        source_file="$source_arg"
+        source_title="${source_file:t:r}"
+    else
+        if ! command -v kitten >/dev/null 2>&1; then
+            zush_error "Kitten clipboard command required when no file is provided"
+            return 1
+        fi
+        clipboard_file=$(mktemp /tmp/mdclipboard-XXXX.md) || return 1
+        if ! kitten clipboard --get > "$clipboard_file"; then
+            rm -f "$clipboard_file"
+            zush_error "Failed to read clipboard contents"
+            return 1
+        fi
+        source_file="$clipboard_file"
+        source_title="Clipboard Preview"
+        cleanup_source_file=1
     fi
+
+    [[ -n "$source_title" ]] || source_title="${source_file:t:r}"
 
     [[ -f "$diagram_filter" ]] || {
         zush_error "Missing diagram filter: $diagram_filter"
@@ -34,8 +58,18 @@ mdp() {
         --embed-resources \
         --css "$preview_css" \
         --lua-filter "$diagram_filter" \
-        --metadata title="${source_file:t:r}" \
-        -t html "$source_file" -o "$preview_file" && xdg-open "$preview_file"
+        --metadata title="$source_title" \
+        -t html "$source_file" -o "$preview_file"
+
+    local pandoc_status=$?
+
+    if (( cleanup_source_file )); then
+        rm -f "$source_file"
+    fi
+
+    (( pandoc_status == 0 )) || return $pandoc_status
+
+    xdg-open "$preview_file"
 }
 
 # Sets Moor as our pager
