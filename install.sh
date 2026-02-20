@@ -371,7 +371,7 @@ update_user_zshrc_paths() {
     fi
 
     if [[ -s "$user_zshrc" ]]; then
-        echo "" >>"$user_zshrc"
+        printf '\n' >>"$user_zshrc"
     fi
 
     cat >>"$user_zshrc" <<'EOF'
