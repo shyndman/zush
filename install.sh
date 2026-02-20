@@ -370,6 +370,10 @@ update_user_zshrc_paths() {
         fi
     fi
 
+    if [[ -s "$user_zshrc" ]]; then
+        echo "" >>"$user_zshrc"
+    fi
+
     cat >>"$user_zshrc" <<'EOF'
 # >>> zush installer path setup >>>
 if [[ -x /opt/homebrew/bin/brew ]]; then
