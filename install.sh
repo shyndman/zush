@@ -249,7 +249,9 @@ install_pyenv_and_python() {
 }
 
 install_nvm_and_node() {
-    if ! command -v nvm >/dev/null 2>&1; then
+    local nvm_command="nvm"
+
+    if ! command -v "$nvm_command" >/dev/null 2>&1 && ! brew_package_installed "nvm"; then
         install_brew_tool "nvm"
     fi
     export NVM_DIR="$HOME/.nvm"
@@ -344,6 +346,15 @@ install_llm_plugins() {
     done
 }
 
+brew_is_available() {
+    command -v brew >/dev/null 2>&1
+}
+
+brew_package_installed() {
+    local package_name="$1"
+    brew_is_available && brew list --versions "$package_name" >/dev/null 2>&1
+}
+
 update_user_zshrc_paths() {
     log_info "Ensuring ~/.zshrc configures Homebrew and pyenv paths..."
 
@@ -403,12 +414,19 @@ install_brew_tool() {
     local tool_name="$1"
     local command_name="${2:-$tool_name}"
 
-    if ! command -v "$command_name" >/dev/null 2>&1; then
-        if confirm_install "$tool_name"; then
-            log_info "Installing $tool_name via Homebrew..."
-            brew install "$tool_name"
-            log_success "$tool_name installed."
-        fi
+    if command -v "$command_name" >/dev/null 2>&1 || brew_package_installed "$tool_name"; then
+        return
+    fi
+
+    if ! brew_is_available; then
+        log_error "Homebrew is not available in PATH. Cannot install $tool_name."
+        return 1
+    fi
+
+    if confirm_install "$tool_name"; then
+        log_info "Installing $tool_name via Homebrew..."
+        brew install "$tool_name"
+        log_success "$tool_name installed."
     fi
 }
 
@@ -416,8 +434,13 @@ install_brew_tool_with_source() {
     local tool_name="$1"
     local command_name="${2:-$tool_name}"
 
-    if command -v "$command_name" >/dev/null 2>&1; then
+    if command -v "$command_name" >/dev/null 2>&1 || brew_package_installed "$tool_name"; then
         return
+    fi
+
+    if ! brew_is_available; then
+        log_error "Homebrew is not available in PATH. Cannot install $tool_name."
+        return 1
     fi
 
     if ! confirm_install "$tool_name"; then
