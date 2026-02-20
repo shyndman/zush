@@ -96,7 +96,6 @@ install_tools() {
 
     # Phase 3: Language-dependent tools
     install_hishtory
-    install_claude_cli
     install_pip_tools
     install_llm_plugins
 
@@ -130,40 +129,60 @@ install_tools() {
     log_success "Tool dependency check complete."
 }
 
+setup_brew_shellenv() {
+    if [[ -x /opt/homebrew/bin/brew ]]; then
+        eval "$(/opt/homebrew/bin/brew shellenv)"
+    elif [[ -x /home/linuxbrew/.linuxbrew/bin/brew ]]; then
+        eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+    elif [[ -x /usr/local/bin/brew ]]; then
+        eval "$(/usr/local/bin/brew shellenv)"
+    elif command -v brew >/dev/null 2>&1; then
+        eval "$(brew shellenv)"
+    fi
+}
+
 install_brew() {
     if ! command -v brew >/dev/null 2>&1; then
-        log_warning "Homebrew is not installed."
-        if confirm_install "Homebrew"; then
-            log_info "Installing Homebrew..."
-            /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-            eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-            log_success "Homebrew installed."
-        else
-            log_error "Cannot proceed without Homebrew."
-            return 1
-        fi
+        log_info "Installing Homebrew..."
+        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+        log_success "Homebrew installed."
+    fi
+
+    setup_brew_shellenv
+
+    if ! command -v brew >/dev/null 2>&1; then
+        log_error "Homebrew installation failed."
+        exit 1
     fi
 }
 
 install_pyenv_and_python() {
+    local python_version="3.14"
+
+    setup_brew_shellenv
+
     if ! command -v pyenv >/dev/null 2>&1; then
-        install_brew_tool "pyenv"
+        log_info "Installing pyenv via Homebrew..."
+        brew install pyenv
+        log_success "pyenv installed."
     fi
 
-    # Initialize pyenv in the current shell if available
-    if command -v pyenv >/dev/null 2>&1; then
-        eval "$(pyenv init -)"
+    if ! command -v pyenv >/dev/null 2>&1; then
+        log_error "pyenv installation failed."
+        exit 1
     fi
 
-    if command -v pyenv >/dev/null 2>&1 && ! pyenv versions --bare | grep -q "^3.12"; then
-        if confirm_install "Python 3.12"; then
-            log_info "Installing Python 3.12 via pyenv..."
-            pyenv install 3.12
-            pyenv global 3.12
-            pyenv shell 3.12
-            log_success "Python 3.12 installed and set as global default."
-        fi
+    eval "$(pyenv init -)"
+
+    if ! pyenv versions --bare | grep -Eq "^${python_version}(\\.|$)"; then
+        log_info "Installing Python ${python_version} via pyenv..."
+        pyenv install "${python_version}"
+        log_success "Python ${python_version} installed."
     fi
+
+    pyenv global "${python_version}"
+    pyenv shell "${python_version}"
+    log_success "Python ${python_version} set as global default."
 }
 
 install_nvm_and_node() {
@@ -218,17 +237,6 @@ install_hishtory() {
         fi
     fi
 }
-
-install_claude_cli() {
-    if ! npm list -g | grep -q "@anthropic-ai/claude-code"; then
-        if confirm_install "Claude Code CLI"; then
-            log_info "Installing @anthropic-ai/claude-code via npm..."
-            npm install -g @anthropic-ai/claude-code
-            log_success "Claude Code CLI installed."
-        fi
-    fi
-}
-
 install_pip_tools() {
     if ! pip list | grep -q "^llm\s"; then
         if confirm_install "llm CLI"; then
@@ -271,6 +279,57 @@ install_llm_plugins() {
             fi
         fi
     done
+}
+
+update_user_zshrc_paths() {
+    log_info "Ensuring ~/.zshrc configures Homebrew and pyenv paths..."
+
+    local user_zshrc="$HOME/.zshrc"
+    local marker_start="# >>> zush installer path setup >>>"
+    local marker_end="# <<< zush installer path setup <<<"
+
+    touch "$user_zshrc"
+    chmod 644 "$user_zshrc"
+
+    if grep -q "$marker_start" "$user_zshrc"; then
+        if grep -q "$marker_end" "$user_zshrc"; then
+            local tmp_file
+            tmp_file=$(mktemp) || {
+                log_error "Failed to create temp file while updating ~/.zshrc"
+                exit 1
+            }
+            awk -v start="$marker_start" -v end="$marker_end" '
+                $0 == start {in_block=1; next}
+                in_block && $0 == end {in_block=0; next}
+                !in_block {print}
+            ' "$user_zshrc" >"$tmp_file"
+            mv "$tmp_file" "$user_zshrc"
+        fi
+    fi
+
+    cat >>"$user_zshrc" <<'EOF'
+# >>> zush installer path setup >>>
+if [[ -x /opt/homebrew/bin/brew ]]; then
+    eval "$(/opt/homebrew/bin/brew shellenv)"
+elif [[ -x /home/linuxbrew/.linuxbrew/bin/brew ]]; then
+    eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+elif [[ -x /usr/local/bin/brew ]]; then
+    eval "$(/usr/local/bin/brew shellenv)"
+elif command -v brew >/dev/null 2>&1; then
+    eval "$(brew shellenv)"
+fi
+
+if [[ -d "$HOME/.pyenv" ]]; then
+    export PYENV_ROOT="$HOME/.pyenv"
+    command -v pyenv >/dev/null 2>&1 || export PATH="$PYENV_ROOT/bin:$PATH"
+    if command -v pyenv >/dev/null 2>&1; then
+        eval "$(pyenv init -)"
+    fi
+fi
+# <<< zush installer path setup <<<
+EOF
+
+    log_success "Updated ~/.zshrc with path additions."
 }
 
 install_brew_tool() {
@@ -573,6 +632,7 @@ main() {
     check_shell
     check_dependencies
     install_tools
+    update_user_zshrc_paths
     handle_existing_installation
     backup_zshenv
     clone_repository
