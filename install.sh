@@ -412,6 +412,33 @@ install_brew_tool() {
     fi
 }
 
+install_brew_tool_with_source() {
+    local tool_name="$1"
+    local command_name="${2:-$tool_name}"
+
+    if command -v "$command_name" >/dev/null 2>&1; then
+        return
+    fi
+
+    if ! confirm_install "$tool_name"; then
+        return
+    fi
+
+    log_info "Installing $tool_name via Homebrew..."
+    if brew install "$tool_name"; then
+        log_success "$tool_name installed."
+        return
+    fi
+
+    log_warning "$tool_name failed to install from binaries; retrying from source..."
+    if brew install --build-from-source "$tool_name"; then
+        log_success "$tool_name installed from source."
+    else
+        log_error "Failed to install $tool_name even from source."
+        return 1
+    fi
+}
+
 # Handle existing installation
 handle_existing_installation() {
     if [[ -d $ZUSH_DIR ]]; then
