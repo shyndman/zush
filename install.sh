@@ -70,7 +70,70 @@ check_dependencies() {
         echo ""
     fi
 
+    check_linux_build_packages
+
     log_success "Dependencies checked"
+}
+
+check_linux_build_packages() {
+    if [[ $(uname -s) != "Linux" ]]; then
+        return
+    fi
+
+    local package_manager=""
+    local -a packages
+    local -a missing=()
+
+    if command -v apt-get >/dev/null 2>&1 && command -v dpkg >/dev/null 2>&1; then
+        package_manager="apt"
+        packages=(
+            build-essential
+            libssl-dev
+            zlib1g-dev
+            libbz2-dev
+            libreadline-dev
+            libsqlite3-dev
+            libffi-dev
+            liblzma-dev
+        )
+        for pkg in "${packages[@]}"; do
+            if ! dpkg -s "$pkg" >/dev/null 2>&1; then
+                missing+=("$pkg")
+            fi
+        done
+    elif command -v dnf >/dev/null 2>&1 && command -v rpm >/dev/null 2>&1; then
+        package_manager="dnf"
+        packages=(
+            gcc
+            gcc-c++
+            make
+            openssl-devel
+            bzip2-devel
+            libffi-devel
+            zlib-devel
+            readline-devel
+            sqlite-devel
+            xz-devel
+        )
+        for pkg in "${packages[@]}"; do
+            if ! rpm -q "$pkg" >/dev/null 2>&1; then
+                missing+=("$pkg")
+            fi
+        done
+    else
+        log_warning "Cannot verify Linux build prerequisites automatically. Ensure compiler toolchain and development headers are installed."
+        return
+    fi
+
+    if ((${#missing[@]} > 0)); then
+        log_error "Missing required build packages: ${missing[*]}"
+        if [[ $package_manager == "apt" ]]; then
+            echo "   Install them with: sudo apt-get update && sudo apt-get install -y ${missing[*]}"
+        elif [[ $package_manager == "dnf" ]]; then
+            echo "   Install them with: sudo dnf install -y ${missing[*]}"
+        fi
+        exit 1
+    fi
 }
 
 # Utility function for interactive confirmation
