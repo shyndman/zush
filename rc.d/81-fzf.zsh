@@ -14,6 +14,9 @@ else
   export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
   export FZF_CTRL_R_OPTS="--height 50% --preview 'echo {3..} | bat --color=always -pl sh' --preview-window 'wrap,up,5'"
   export FZF_ALT_C_COMMAND='fd --type d --hidden --follow --exclude .git'
+  
+  # For some reason, I've been having to set this or my completions are really effed
+  fzf_default_completion='complete-word'
 
   # Set fzf options to use the preview function
   export FZF_DEFAULT_OPTS=" \
@@ -37,3 +40,4 @@ else
           --preview-window 'up,60%,border-bottom,+{2}+3/3,~3' # Adjust preview window as needed
   }
 fi
+
