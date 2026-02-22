@@ -26,6 +26,7 @@ source_file=""
 source_title=""
 clipboard_file=""
 zush_home="${ZUSH_HOME:-${ZDOTDIR:-$HOME/.config/zush}}"
+pandoc_reader="markdown+lists_without_preceding_blankline"
 diagram_filter="${zush_home}/vendor/pandoc-ext/diagram/_extensions/diagram/diagram.lua"
 preview_css="${zush_home}/assets/mdp-preview.css"
 mermaid_bin="${commands[mmdc]:-${zush_home}/scripts/mmdc-wrapper.sh}"
@@ -73,8 +74,9 @@ fi
 preview_file=$(mktemp /tmp/mdpreview-XXXX.html) || exit 1
 
 MERMAID_BIN="$mermaid_bin" pandoc \
-   --standalone \
-   --embed-resources \
+    -f "$pandoc_reader" \
+    --standalone \
+    --embed-resources \
    --css "$preview_css" \
    --lua-filter "$diagram_filter" \
    --metadata title="$source_title" \
