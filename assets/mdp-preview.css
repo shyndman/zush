@@ -4,6 +4,7 @@
     --mdp-border: #d9cebe;
     --mdp-text: #23303b;
     --mdp-muted: #5e6c76;
+    --mdp-soft-muted: color-mix(in srgb, var(--mdp-muted) 55%, white);
     --mdp-accent: #0f766e;
     --mdp-code-bg: #ece3d7;
     --mdp-content-width: 50rem;
@@ -163,7 +164,12 @@ li + li {
 
 ul li::marker,
 ol li::marker {
-    color: var(--mdp-muted);
+    color: var(--mdp-soft-muted);
+}
+
+strong,
+b {
+    color: color-mix(in srgb, var(--mdp-text) 75%, var(--mdp-soft-muted));
 }
 
 li > ul,
