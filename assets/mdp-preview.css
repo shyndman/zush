@@ -161,6 +161,11 @@ li + li {
     margin-top: 1em;
 }
 
+ul li::marker,
+ol li::marker {
+    color: var(--mdp-muted);
+}
+
 li > ul,
 li > ol {
     margin: 0.3em 0;
