@@ -1,0 +1,89 @@
+#!/usr/bin/env zsh
+
+_log_error() {
+   print -u2 -- "mdp: $*"
+}
+
+typeset -a _mdp_cleanup_files
+
+_mdp_register_cleanup() {
+   local file="$1"
+   [[ -n "$file" ]] || return
+   _mdp_cleanup_files+=("$file")
+}
+
+_mdp_cleanup() {
+   local file
+   for file in "${_mdp_cleanup_files[@]}"; do
+       [[ -n "$file" && -e "$file" ]] && rm -f -- "$file"
+   done
+}
+
+trap _mdp_cleanup EXIT
+
+source_arg="$1"
+source_file=""
+source_title=""
+clipboard_file=""
+zush_home="${ZUSH_HOME:-${ZDOTDIR:-$HOME/.config/zush}}"
+diagram_filter="${zush_home}/vendor/pandoc-ext/diagram/_extensions/diagram/diagram.lua"
+preview_css="${zush_home}/assets/mdp-preview.css"
+mermaid_bin="${commands[mmdc]:-${zush_home}/scripts/mmdc-wrapper.sh}"
+
+if [[ -n "$source_arg" ]]; then
+   if [[ ! -f "$source_arg" ]]; then
+       _log_error "Markdown file not found: $source_arg"
+       exit 1
+   fi
+   source_file="$source_arg"
+   source_title="${source_file:t:r}"
+else
+   if ! command -v kitten >/dev/null 2>&1; then
+       _log_error "Kitten clipboard command required when no file is provided"
+       exit 1
+   fi
+   clipboard_file=$(mktemp /tmp/mdclipboard-XXXX.md) || exit 1
+   if ! kitten clipboard --get >"$clipboard_file"; then
+       rm -f "$clipboard_file"
+       _log_error "Failed to read clipboard contents"
+       exit 1
+   fi
+   source_file="$clipboard_file"
+   source_title="Clipboard Preview"
+   _mdp_register_cleanup "$clipboard_file"
+fi
+
+[[ -n "$source_title" ]] || source_title="${source_file:t:r}"
+
+if [[ ! -f "$diagram_filter" ]]; then
+   _log_error "Missing diagram filter: $diagram_filter"
+   exit 1
+fi
+
+if [[ ! -f "$preview_css" ]]; then
+   _log_error "Missing preview CSS: $preview_css"
+   exit 1
+fi
+
+if [[ ! -x "$mermaid_bin" ]]; then
+   _log_error "Mermaid binary is not executable: $mermaid_bin"
+   exit 1
+fi
+
+preview_file=$(mktemp /tmp/mdpreview-XXXX.html) || exit 1
+
+MERMAID_BIN="$mermaid_bin" pandoc \
+   --standalone \
+   --embed-resources \
+   --css "$preview_css" \
+   --lua-filter "$diagram_filter" \
+   --metadata title="$source_title" \
+   -t html "$source_file" -o "$preview_file"
+
+pandoc_status=$?
+
+if (( pandoc_status != 0 )); then
+   exit $pandoc_status
+fi
+
+xdg-open "$preview_file"
