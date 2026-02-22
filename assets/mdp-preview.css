@@ -6,7 +6,7 @@
     --mdp-muted: #5e6c76;
     --mdp-accent: #0f766e;
     --mdp-code-bg: #ece3d7;
-    --mdp-content-width: 42rem;
+    --mdp-content-width: 50rem;
 }
 
 * {
@@ -22,7 +22,7 @@ body {
         radial-gradient(circle at 5% 85%, #efe4d2 0%, transparent 35%),
         var(--mdp-bg);
     color: var(--mdp-text);
-    font: 1.08rem/1.7 "Source Serif 4", Charter, "Iowan Old Style", Georgia, serif;
+    font: 1.12rem/2 "Source Serif 4", Charter, "Iowan Old Style", Georgia, serif;
 }
 
 /* Content width constraint - all block elements */
