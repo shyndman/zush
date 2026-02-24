@@ -4,3 +4,5 @@
 zushp zdharma-continuum/fast-syntax-highlighting
 zushp mdumitru/fancy-ctrl-z
 zushp Tarrasch/zsh-autoenv
+zushp shyndman/hacker-welcome
+
