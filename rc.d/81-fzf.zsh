@@ -15,8 +15,8 @@ else
   export FZF_CTRL_R_OPTS="--height 50% --preview 'echo {3..} | bat --color=always -pl sh' --preview-window 'wrap,up,5'"
   export FZF_ALT_C_COMMAND='fd --type d --hidden --follow --exclude .git'
   
-  # For some reason, I've been having to set this or my completions are really effed
-  fzf_default_completion='complete-word'
+  # Keep default Tab fallback so wildcard expansion still works
+  fzf_default_completion='expand-or-complete'
 
   # Set fzf options to use the preview function
   export FZF_DEFAULT_OPTS=" \
