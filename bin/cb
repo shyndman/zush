@@ -1,0 +1,31 @@
+#!/usr/bin/env sh
+
+log_error() {
+    printf '%s\n' "cb: $*" >&2
+}
+
+if ! command -v kitten >/dev/null 2>&1; then
+    log_error "kitten is required"
+    exit 1
+fi
+
+stdin_is_data_source=0
+if [ -p /dev/stdin ] || [ -f /dev/stdin ]; then
+    stdin_is_data_source=1
+fi
+
+if [ "$#" -gt 0 ]; then
+    if [ "$stdin_is_data_source" -eq 1 ]; then
+        log_error "pass clipboard contents by stdin or arguments, not both"
+        exit 1
+    fi
+
+    printf '%s' "$*" | kitten clipboard
+    exit $?
+fi
+
+if [ "$stdin_is_data_source" -eq 1 ]; then
+    exec kitten clipboard
+fi
+
+exec kitten clipboard --get
