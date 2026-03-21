@@ -6,6 +6,7 @@ alias fd='fd --no-ignore-vcs'
 
 alias md='mkdir -p'
 mdc() { mkdir -p "$1" && cd "$1"; }
+alias mv='mv -i'
 alias rm='trash-put'
 alias g='git'
 
