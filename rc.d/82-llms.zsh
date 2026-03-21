@@ -1,11 +1,12 @@
 # OpenCode Aliases
 
-LW_MODEL='google/gemini-2.5-flash-lite'
-HW_MODEL='openai/gpt-5.1-codex'
+LW_MODEL='google/gemini-3.1-flash-lite-preview --thinking=high'
+HW_MODEL='openai/gpt-5.4 --thinking=high'
 
-alias ompc='omp --continue'
-alias omprl="omp --model=$LW_MODEL"
-alias omprh="omp --model=$HW_MODEL --thinking=high"
+alias dpi='kitty @ launch --type=overlay --cwd=current omp'
+alias dpic='dpi --continue'
+alias dpirl="dpi --model=$LW_MODEL"
+alias dpirh="dpi --model=$HW_MODEL"
 
 alias oc='opencode'
 alias occ='opencode --continue'
