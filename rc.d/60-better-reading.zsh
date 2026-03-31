@@ -22,11 +22,6 @@ if command -v batman >/dev/null 2>&1; then
     }
 fi
 
-# Bat-extras aliases
-alias bg='batgrep'
-alias bd='batdiff'
-alias bw='batwatch'
-
 # Replace cat with bat (no line numbers by default)
 alias cat='bat --style=plain'
 
