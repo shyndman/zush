@@ -20,6 +20,12 @@ if [[ -d "$ZUSH_COMPLETIONS_DIR" ]]; then
     zush_debug "Added completions directory to FPATH: $ZUSH_COMPLETIONS_DIR"
 fi
 
+# Add user ~/.zfunc directory to FPATH
+if [[ -d ~/.zfunc ]]; then
+    fpath=(~/.zfunc "${fpath[@]}")
+    zush_debug "Added user zfunc directory to FPATH: ~/.zfunc"
+fi
+
 # Add user site-functions directory to FPATH
 if [[ -d ~/.local/share/zsh/site-functions ]]; then
     fpath=(~/.local/share/zsh/site-functions "${fpath[@]}")
