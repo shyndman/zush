@@ -4,6 +4,7 @@
 # Main development directories
 alias cdd='cd ~/dev'
 alias cddp='cd ~/dev/projects'
+alias cddn='cd ~/Documents/Notes'
 alias cddpl='cd ~/dev/projects/lmnop'
 alias cddg='cd ~/dev/github.com'
 alias cdds='cd ~/dev/scratch'
