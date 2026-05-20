@@ -2,6 +2,7 @@
 
 LW_MODEL='google/gemini-3.1-flash-lite-preview --thinking=high'
 HW_MODEL='openai/gpt-5.4 --thinking=high'
+COMPLETE_MODEL='openai/gpt-5.4-mini'
 
 alias dpi="VIRTUAL_ENV=$HOME/.omp/venv kitty @ launch --type=overlay --cwd=current --copy-env ~/.local/bin/omp"
 alias dpic='dpi --continue'
@@ -111,7 +112,7 @@ __llm_cmdcomp() {
   fi
 
   echo # Start the program on a blank line
-  local result=$(llm complete "$old_cmd")
+  local result=$(llm complete --model "$COMPLETE_MODEL" "$old_cmd")
   if [ $? -eq 0 ] && [ ! -z "$result" ]; then
     BUFFER=$result
   else
