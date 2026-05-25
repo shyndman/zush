@@ -2,7 +2,7 @@
 
 LW_MODEL='google/gemini-3.1-flash-lite-preview --thinking=high'
 HW_MODEL='openai/gpt-5.4 --thinking=high'
-COMPLETE_MODEL='openai/gpt-5.4-mini'
+COMPLETE_MODEL='gpt-5.4-mini'
 
 alias dpi="VIRTUAL_ENV=$HOME/.omp/venv kitty @ launch --type=overlay --cwd=current --copy-env ~/.local/bin/omp"
 alias dpic='dpi --continue'
