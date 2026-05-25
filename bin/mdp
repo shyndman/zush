@@ -25,7 +25,16 @@ source_arg="$1"
 source_file=""
 source_title=""
 clipboard_file=""
-zush_home="${ZUSH_HOME:-${ZDOTDIR:-$HOME/.config/zush}}"
+script_path="$0"
+if [[ "$script_path" != */* ]]; then
+   script_path=$(whence -p "$0")
+fi
+if [[ -z "$script_path" || ! -e "$script_path" ]]; then
+   _log_error "Unable to resolve mdp script path"
+   exit 1
+fi
+script_dir="${script_path:A:h}"
+zush_home="${ZUSH_HOME:-${script_dir:h}}"
 pandoc_reader="markdown+lists_without_preceding_blankline"
 diagram_filter="${zush_home}/vendor/pandoc-ext/diagram/_extensions/diagram/diagram.lua"
 preview_css="${zush_home}/assets/mdp-preview.css"
