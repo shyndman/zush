@@ -25,6 +25,9 @@
     --mdp-page-bg: #111827;
     --mdp-page-panel: #1f2937;
     --mdp-prose-max-width: 46rem;
+    --mdp-heading-font: "Ubuntu Sans", "Noto Sans", sans-serif;
+    --mdp-heading-weight-strong: 600;
+    --mdp-heading-weight-regular: 500;
     --mdp-prose-body: #d1d5db;
     --mdp-prose-headings: #ffffff;
     --mdp-prose-lead: #9ca3af;
@@ -107,6 +110,22 @@ body {
     --tw-prose-invert-td-borders: var(--mdp-prose-td-borders);
 }
 
+.mdp-prose :where(h1, h2, h3, h4) {
+    font-family: var(--mdp-heading-font);
+}
+
+.mdp-prose :where(h1) {
+    font-weight: var(--mdp-heading-weight-strong);
+}
+
+.mdp-prose :where(h2) {
+    font-weight: var(--mdp-heading-weight-strong);
+}
+
+.mdp-prose :where(h3, h4) {
+    font-weight: var(--mdp-heading-weight-regular);
+}
+
 .mdp-prose > :first-child {
     margin-top: 0;
 }
@@ -154,6 +173,8 @@ body {
 .mdp-prose header#title-block-header h1 {
     margin-bottom: 0.2em;
     font-size: 2.1rem;
+    font-family: var(--mdp-heading-font);
+    font-weight: var(--mdp-heading-weight-strong);
     line-height: 1.15;
 }
 
