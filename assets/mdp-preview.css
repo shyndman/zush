@@ -891,11 +891,9 @@ body {
   padding: 3rem 1.5rem 4rem;
   background: var(--mdp-page-bg);
   color: var(--mdp-prose-body);
-  font-family: "Mona Sans VF", sans-serif;
+  font-family: "Adelle", Georgia, serif;
   font-size: 1.25rem;
   line-height: 1.8;
-  font-feature-settings: "ss01" on, "ss03" on, "ss05" on;
-  font-optical-sizing: auto;
   text-rendering: optimizeLegibility;
 }
 .mdp-prose {
