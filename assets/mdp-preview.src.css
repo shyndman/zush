@@ -1,0 +1,233 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+@source inline("prose prose-2xl prose-invert");
+
+@font-face {
+    font-family: "Mona Sans VF";
+    src: url("https://cdn.jsdelivr.net/gh/github/mona-sans@main/fonts/webfonts/variable/MonaSansVF%5Bwdth%2Cwght%2Copsz%2Cital%5D.woff2") format("woff2-variations");
+    font-display: swap;
+    font-weight: 200 900;
+    font-stretch: 75% 125%;
+    font-style: normal italic;
+}
+
+@font-face {
+    font-family: "Mona Sans Mono VF";
+    src: url("https://cdn.jsdelivr.net/gh/github/mona-sans@main/fonts/webfonts/variable/MonaSansMonoVF%5Bwdth%2Cwght%5D.woff2") format("woff2-variations");
+    font-display: swap;
+    font-weight: 200 900;
+    font-stretch: 75% 125%;
+    font-style: normal;
+}
+
+:root {
+    color-scheme: dark;
+    --mdp-page-bg: #111827;
+    --mdp-page-panel: #1f2937;
+    --mdp-prose-max-width: 46rem;
+    --mdp-prose-body: #d1d5db;
+    --mdp-prose-headings: #ffffff;
+    --mdp-prose-lead: #9ca3af;
+    --mdp-prose-links: #ffffff;
+    --mdp-prose-bold: #ffffff;
+    --mdp-prose-counters: #9ca3af;
+    --mdp-prose-bullets: #4b5563;
+    --mdp-prose-hr: #374151;
+    --mdp-prose-quotes: #f3f4f6;
+    --mdp-prose-quote-borders: #374151;
+    --mdp-prose-captions: #9ca3af;
+    --mdp-prose-kbd: #ffffff;
+    --mdp-prose-kbd-shadows: 255 255 255;
+    --mdp-prose-code: #ffffff;
+    --mdp-prose-pre-code: #d1d5db;
+    --mdp-prose-pre-bg: rgb(0 0 0 / 50%);
+    --mdp-prose-th-borders: #4b5563;
+    --mdp-prose-td-borders: #374151;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html {
+    -webkit-text-size-adjust: 100%;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    padding: 3rem 1.5rem 4rem;
+    background: var(--mdp-page-bg);
+    color: var(--mdp-prose-body);
+    font-family: "Mona Sans VF", sans-serif;
+    font-size: 1.25rem;
+    line-height: 1.8;
+    font-feature-settings: "ss01" on, "ss03" on, "ss05" on;
+    font-optical-sizing: auto;
+    text-rendering: optimizeLegibility;
+}
+
+.mdp-prose {
+    width: 100%;
+    max-width: var(--mdp-prose-max-width);
+    margin: 0 auto;
+    --tw-prose-body: var(--mdp-prose-body);
+    --tw-prose-headings: var(--mdp-prose-headings);
+    --tw-prose-lead: var(--mdp-prose-lead);
+    --tw-prose-links: var(--mdp-prose-links);
+    --tw-prose-bold: var(--mdp-prose-bold);
+    --tw-prose-counters: var(--mdp-prose-counters);
+    --tw-prose-bullets: var(--mdp-prose-bullets);
+    --tw-prose-hr: var(--mdp-prose-hr);
+    --tw-prose-quotes: var(--mdp-prose-quotes);
+    --tw-prose-quote-borders: var(--mdp-prose-quote-borders);
+    --tw-prose-captions: var(--mdp-prose-captions);
+    --tw-prose-kbd: var(--mdp-prose-kbd);
+    --tw-prose-kbd-shadows: var(--mdp-prose-kbd-shadows);
+    --tw-prose-code: var(--mdp-prose-code);
+    --tw-prose-pre-code: var(--mdp-prose-pre-code);
+    --tw-prose-pre-bg: var(--mdp-prose-pre-bg);
+    --tw-prose-th-borders: var(--mdp-prose-th-borders);
+    --tw-prose-td-borders: var(--mdp-prose-td-borders);
+    --tw-prose-invert-body: var(--mdp-prose-body);
+    --tw-prose-invert-headings: var(--mdp-prose-headings);
+    --tw-prose-invert-lead: var(--mdp-prose-lead);
+    --tw-prose-invert-links: var(--mdp-prose-links);
+    --tw-prose-invert-bold: var(--mdp-prose-bold);
+    --tw-prose-invert-counters: var(--mdp-prose-counters);
+    --tw-prose-invert-bullets: var(--mdp-prose-bullets);
+    --tw-prose-invert-hr: var(--mdp-prose-hr);
+    --tw-prose-invert-quotes: var(--mdp-prose-quotes);
+    --tw-prose-invert-quote-borders: var(--mdp-prose-quote-borders);
+    --tw-prose-invert-captions: var(--mdp-prose-captions);
+    --tw-prose-invert-kbd: var(--mdp-prose-kbd);
+    --tw-prose-invert-kbd-shadows: var(--mdp-prose-kbd-shadows);
+    --tw-prose-invert-code: var(--mdp-prose-code);
+    --tw-prose-invert-pre-code: var(--mdp-prose-pre-code);
+    --tw-prose-invert-pre-bg: var(--mdp-prose-pre-bg);
+    --tw-prose-invert-th-borders: var(--mdp-prose-th-borders);
+    --tw-prose-invert-td-borders: var(--mdp-prose-td-borders);
+}
+
+.mdp-prose > :first-child {
+    margin-top: 0;
+}
+
+.mdp-prose > :last-child {
+    margin-bottom: 0;
+}
+
+.mdp-prose :where(code, samp, pre) {
+    font-family: "Mona Sans Mono VF", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+}
+
+.mdp-prose :where(kbd) {
+    color: var(--mdp-prose-kbd);
+    font-family: inherit;
+    font-size: 0.875em;
+    font-weight: 500;
+    border-radius: 0.3125rem;
+    box-shadow: 0 0 0 1px rgb(var(--mdp-prose-kbd-shadows) / 10%), 0 3px 0 rgb(var(--mdp-prose-kbd-shadows) / 10%);
+    padding: 0.1875em 0.375em;
+}
+
+.mdp-prose :where(svg) {
+    display: block;
+    max-width: 100%;
+    height: auto;
+}
+
+.mdp-prose div.sourceCode {
+    margin-top: 2em;
+    margin-bottom: 2em;
+}
+
+.mdp-prose div.sourceCode pre {
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+.mdp-prose header#title-block-header {
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--mdp-prose-hr);
+}
+
+.mdp-prose header#title-block-header h1 {
+    margin-bottom: 0.2em;
+    font-size: 2.1rem;
+    line-height: 1.15;
+}
+
+.mdp-prose header#title-block-header p {
+    margin-top: 0.45rem;
+    margin-bottom: 0;
+}
+
+.mdp-prose header#title-block-header .subtitle {
+    margin-top: 0;
+    margin-bottom: 0.8rem;
+    color: var(--mdp-prose-lead);
+    font-size: 1.05rem;
+    line-height: 1.5;
+}
+
+.mdp-prose header#title-block-header .author,
+.mdp-prose header#title-block-header .date {
+    color: var(--mdp-prose-captions);
+    font-size: 0.875em;
+}
+
+.mdp-prose nav#TOC {
+    display: none;
+}
+
+.mdp-prose nav#TOC:has(ul, ol) {
+    display: block;
+    margin-top: 0;
+    margin-bottom: 2em;
+    padding: 1rem 1.25rem;
+    border: 1px solid var(--mdp-prose-hr);
+    border-radius: 0.75rem;
+    background: var(--mdp-page-panel);
+}
+
+.mdp-prose nav#TOC ul,
+.mdp-prose nav#TOC ol {
+    margin-top: 0.75em;
+    margin-bottom: 0.75em;
+}
+
+.mdp-prose nav#TOC > ul,
+.mdp-prose nav#TOC > ol {
+    margin-bottom: 0;
+}
+
+.mdp-prose ul.task-list {
+    padding-left: 0;
+    list-style: none;
+}
+
+.mdp-prose li.task-list-item {
+    display: flex;
+    align-items: baseline;
+    gap: 0.625rem;
+    padding-left: 0;
+}
+
+.mdp-prose li.task-list-item > input[type="checkbox"] {
+    margin: 0;
+}
+
+.mdp-prose section.footnotes {
+    margin-top: 3em;
+    padding-top: 1.5em;
+    border-top: 1px solid var(--mdp-prose-hr);
+    color: var(--mdp-prose-lead);
+    font-size: 0.875em;
+}
+
+.mdp-prose section.footnotes p {
+    margin-top: 0.75em;
+    margin-bottom: 0.75em;
+}

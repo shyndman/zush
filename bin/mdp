@@ -38,6 +38,8 @@ zush_home="${ZUSH_HOME:-${script_dir:h}}"
 pandoc_reader="markdown+lists_without_preceding_blankline"
 diagram_filter="${zush_home}/vendor/pandoc-ext/diagram/_extensions/diagram/diagram.lua"
 preview_css="${zush_home}/assets/mdp-preview.css"
+preview_before_body="${zush_home}/assets/mdp-preview-before-body.html"
+preview_after_body="${zush_home}/assets/mdp-preview-after-body.html"
 mermaid_bin="${commands[mmdc]:-${zush_home}/scripts/mmdc-wrapper.sh}"
 
 if [[ -n "$source_arg" ]]; then
@@ -75,6 +77,16 @@ if [[ ! -f "$preview_css" ]]; then
    exit 1
 fi
 
+if [[ ! -f "$preview_before_body" ]]; then
+   _log_error "Missing before-body HTML: $preview_before_body"
+   exit 1
+fi
+
+if [[ ! -f "$preview_after_body" ]]; then
+   _log_error "Missing after-body HTML: $preview_after_body"
+   exit 1
+fi
+
 if [[ ! -x "$mermaid_bin" ]]; then
    _log_error "Mermaid binary is not executable: $mermaid_bin"
    exit 1
@@ -86,10 +98,12 @@ MERMAID_BIN="$mermaid_bin" pandoc \
     -f "$pandoc_reader" \
     --standalone \
     --embed-resources \
-   --css "$preview_css" \
-   --lua-filter "$diagram_filter" \
-   --metadata title="$source_title" \
-   -t html "$source_file" -o "$preview_file"
+    --css "$preview_css" \
+    --lua-filter "$diagram_filter" \
+    --include-before-body "$preview_before_body" \
+    --include-after-body "$preview_after_body" \
+    --metadata title="$source_title" \
+    -t html "$source_file" -o "$preview_file"
 
 pandoc_status=$?
 

@@ -1,0 +1,31 @@
+{
+  "name": "zush",
+  "version": "1.0.0",
+  "description": "[![pre-commit](https://github.com/shyndman/zush/actions/workflows/pre-commit.yml/badge.svg?branch=main)](https://github.com/shyndman/zush/actions/workflows/pre-commit.yml) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE) [![Shell: zsh](https://img.shields.io/badge/Shell-zsh-informational)](https://www.zsh.org/)",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib",
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build:mdp-preview": "tailwindcss -i assets/mdp-preview.src.css -o assets/mdp-preview.css"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shyndman/zush.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/shyndman/zush/issues"
+  },
+  "homepage": "https://github.com/shyndman/zush#readme",
+  "devDependencies": {
+    "@tailwindcss/cli": "4.3.0",
+    "@tailwindcss/typography": "0.5.19",
+    "tailwindcss": "4.3.0"
+  }
+}
