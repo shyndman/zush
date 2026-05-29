@@ -30,7 +30,7 @@ Zush is a modular, performance-aware zsh configuration system designed to achiev
     ├── 00-profiling.zsh      # profiling setup
     ├── 01-compinit-plugin.zsh # compinit bootstrap for plugins
     ├── 05-path.zsh           # path exports and prioritization
-    ├── 10-lazy-tools.zsh     # lazy loaders (brew, nvm, pyenv, cargo, esp-idf)
+    ├── 10-lazy-tools.zsh     # lazy loaders (brew, nvm, cargo, esp-idf)
     ├── 15-misc-plugins.zsh   # personal plugin loading
     ├── 20-zsh-options.zsh    # core zsh behavioral options
     ├── 30-history.zsh        # comprehensive history management
@@ -56,7 +56,7 @@ Zush is a modular, performance-aware zsh configuration system designed to achiev
 ### Key Performance Features
 
 **1. Lazy Loading with Environment Caching**
-- Tools like nvm, pyenv, cargo, and homebrew are lazy-loaded on first use
+- Tools like nvm, cargo, and homebrew are lazy-loaded on first use
 - Environment changes (PATH, FPATH, env vars) are cached for instant application on startup
 - Eliminates 500-800ms of startup overhead from tool initialization
 
@@ -232,10 +232,10 @@ _zushc_bg                # Background compilation
 ### High-Impact Performance Optimizations
 
 **1. Eval Command Caching**
-- Cache output of expensive eval commands (`pyenv init -`, `brew shellenv`)
+- Cache output of expensive eval commands (`brew shellenv`)
 - Potential 50-200ms savings per cached command
 - Auto-regenerate cache when tools are updated
-- Implementation: `zush_cached_eval pyenv "pyenv init -"`
+- Implementation: `zush_cached_eval brew "brew shellenv"`
 
 **2. Completion System Optimization**
 - Implement daily compinit cache refresh

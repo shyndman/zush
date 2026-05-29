@@ -18,7 +18,7 @@ curl -fsSL https://raw.githubusercontent.com/shyndman/zush/main/install.sh | zsh
 
 - **Instant Prompts** - Basic prompt appears immediately, full prompt loads after ~129ms
 - **Plugin Management** - Simple `zushp user/repo` command to install GitHub plugins  
-- **Lazy Loading** - Tools like nvm, pyenv, cargo load only when needed
+- **Lazy Loading** - Tools like nvm and cargo load only when needed
 - **Auto-compilation** - All ZSH files compiled with zcompile for faster loading
 - **Smart Caching** - Environment changes cached for instant startup
 

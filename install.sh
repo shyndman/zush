@@ -152,8 +152,8 @@ install_tools() {
     # Phase 1: Core package manager (Homebrew)
     install_brew
 
-    # Phase 2: Language Version Managers & Runtimes
-    install_pyenv_and_python
+    # Phase 2: Language Runtimes
+    install_python
     install_nvm_and_node
     install_rustup_and_rust
 
@@ -178,6 +178,7 @@ install_tools() {
         ripgrep
         starship
         trash-cli
+        uv
     )
     for tool in "${brew_tools[@]}"; do
         install_brew_tool "$tool"
@@ -219,33 +220,20 @@ install_brew() {
     fi
 }
 
-install_pyenv_and_python() {
-    local python_version="3.14"
-
-    setup_brew_shellenv
-
-    if ! command -v pyenv >/dev/null 2>&1; then
-        log_info "Installing pyenv via Homebrew..."
-        brew install pyenv
-        log_success "pyenv installed."
+install_python() {
+    if command -v python3 >/dev/null 2>&1 && python3 -m pip --version >/dev/null 2>&1; then
+        return
     fi
 
-    if ! command -v pyenv >/dev/null 2>&1; then
-        log_error "pyenv installation failed."
+    log_info "Installing Python via Homebrew..."
+    install_brew_tool "python" "python3"
+
+    if ! command -v python3 >/dev/null 2>&1 || ! python3 -m pip --version >/dev/null 2>&1; then
+        log_error "Python installation failed."
         exit 1
     fi
 
-    eval "$(pyenv init -)"
-
-    if ! pyenv versions --bare | grep -Eq "^${python_version}(\\.|$)"; then
-        log_info "Installing Python ${python_version} via pyenv..."
-        pyenv install "${python_version}"
-        log_success "Python ${python_version} installed."
-    fi
-
-    pyenv global "${python_version}"
-    pyenv shell "${python_version}"
-    log_success "Python ${python_version} set as global default."
+    log_success "Python installed."
 }
 
 install_nvm_and_node() {
@@ -303,18 +291,11 @@ install_hishtory() {
     fi
 }
 install_pip_tools() {
-    if ! pip list | grep -q "^llm\s"; then
+    if ! python3 -m pip list | grep -q "^llm\s"; then
         if confirm_install "llm CLI"; then
             log_info "Installing llm via pip..."
-            pip install llm
+            python3 -m pip install llm
             log_success "llm installed."
-        fi
-    fi
-    if ! pip list | grep -q "^uv\s"; then
-        if confirm_install "uv (Python package manager)"; then
-            log_info "Installing uv via pip..."
-            pip install uv
-            log_success "uv installed."
         fi
     fi
 }
@@ -356,7 +337,7 @@ brew_package_installed() {
 }
 
 update_user_zshrc_paths() {
-    log_info "Ensuring ~/.zshrc configures Homebrew and pyenv paths..."
+    log_info "Ensuring ~/.zshrc configures Homebrew paths..."
 
     local user_zshrc="$HOME/.zshrc"
     local marker_start="# >>> zush installer path setup >>>"
@@ -397,13 +378,6 @@ elif command -v brew >/dev/null 2>&1; then
     eval "$(brew shellenv)"
 fi
 
-if [[ -d "$HOME/.pyenv" ]]; then
-    export PYENV_ROOT="$HOME/.pyenv"
-    command -v pyenv >/dev/null 2>&1 || export PATH="$PYENV_ROOT/bin:$PATH"
-    if command -v pyenv >/dev/null 2>&1; then
-        eval "$(pyenv init -)"
-    fi
-fi
 # <<< zush installer path setup <<<
 EOF
 
