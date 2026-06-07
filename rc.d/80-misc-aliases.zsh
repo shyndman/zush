@@ -3,6 +3,7 @@ alias %='whence -p'
 
 # I hate that by default, fd can't find anything
 alias fd='fd --no-ignore-vcs'
+alias fda='fd --absolute-path --hidden --no-ignore --type file --glob'
 
 alias md='mkdir -p'
 mdc() { mkdir -p "$1" && cd "$1"; }
