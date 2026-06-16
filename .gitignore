@@ -12,3 +12,5 @@ plugins/*
 !plugins/.gitkeep
 
 /worktrees
+
+node_modules/
