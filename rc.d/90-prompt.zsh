@@ -6,6 +6,11 @@ if ! command -v starship >/dev/null 2>&1; then
     return 1
 fi
 
+# Starship cannot render under a dumb terminal; keep the default prompt.
+if _zush_term_is_dumb; then
+    return 0
+fi
+
 export STARSHIP_CONFIG="$HOME/.config/starship/starship.toml"
 
 # Ensure starship config is available

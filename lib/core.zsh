@@ -38,6 +38,13 @@ _zush_source() {
     fi
 }
 
+# True under a dumb terminal (TERM=dumb): no ZLE / line editor, and prompts
+# like starship refuse to render. Guards interactive-only setup that would
+# otherwise error (bindkey on empty key sequences, fzf option restore, etc.).
+_zush_term_is_dumb() {
+    [[ "$TERM" == "dumb" ]]
+}
+
 # Eval cache maintenance shared across modules
 _zush_eval_clear() {
     local eval_cache_dir="${ZUSH_CACHE_DIR}/eval"

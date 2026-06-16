@@ -1,5 +1,7 @@
 #### Set up fzf key bindings and fuzzy completion
-source <(fzf --zsh)
+if ! _zush_term_is_dumb; then
+    source <(fzf --zsh)
+fi
 
 # # Check dependencies first: magick for image list, fd/rg for fzf commands
 if ! command -v magick > /dev/null 2>&1; then

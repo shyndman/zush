@@ -14,6 +14,9 @@ _zush_show_instant_prompt() {
     # Skip if not interactive shell
     [[ ! -o interactive ]] && return
 
+    # Skip under a dumb terminal (starship refuses to render)
+    _zush_term_is_dumb && return
+
     # Skip if starship not available
     (( ! ${+commands[starship]} )) && return
 
