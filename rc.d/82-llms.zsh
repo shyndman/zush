@@ -4,7 +4,7 @@ LW_MODEL='google/gemini-3.1-flash-lite-preview --thinking=high'
 HW_MODEL='openai/gpt-5.4 --thinking=high'
 COMPLETE_MODEL='gpt-5.4-mini'
 
-alias dpi="kitty @ launch --type=overlay --cwd=current --copy-env `which omp`"
+alias dpi='kitty @ launch --type=overlay --cwd=current --copy-env "$(command -v omp)"'
 alias dpic='dpi --continue'
 alias dpirl="dpi --model=$LW_MODEL"
 alias dpirh="dpi --model=$HW_MODEL"
