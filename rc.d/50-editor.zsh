@@ -1,12 +1,12 @@
 # Editor configuration
 # Sets up editor preferences based on environment
 
-# Use VS Code if local (with -w to wait), vim if remote
+# Use Zed if local (with -w to wait), neovim if remote
 if [[ -z "$SSH_CONNECTION" ]] && (( ${+commands[code]} )); then
-    export EDITOR="code -w"
-    export VISUAL="code -w"
+    export EDITOR="zed -w"
+    export VISUAL="zed -w"
 else
-    export EDITOR="vim"
-    export VISUAL="vim"
+    export EDITOR="nvim"
+    export VISUAL="nvim"
 fi
 
