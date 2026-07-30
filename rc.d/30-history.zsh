@@ -21,12 +21,12 @@ setopt hist_reduce_blanks      # remove superfluous blanks before recording
 alias history="history 0"
 
 # Support prefix matching when using up and down arrows to navigate history
-if ! _zush_term_is_dumb; then
+if _zush_has_line_editor; then
     autoload -Uz history-search-end
     zle -N history-beginning-search-backward-end history-search-end
     zle -N history-beginning-search-forward-end history-search-end
-    bindkey "${terminfo[kcuu1]}" history-beginning-search-backward-end
-    bindkey "${terminfo[kcud1]}" history-beginning-search-forward-end
+    [[ -n "${terminfo[kcuu1]:-}" ]] && bindkey "${terminfo[kcuu1]}" history-beginning-search-backward-end
+    [[ -n "${terminfo[kcud1]:-}" ]] && bindkey "${terminfo[kcud1]}" history-beginning-search-forward-end
 fi
 
 # Hishtory integration (optional - only loads if available)

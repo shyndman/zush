@@ -1,5 +1,5 @@
 #### Set up fzf key bindings and fuzzy completion
-if ! _zush_term_is_dumb; then
+if _zush_has_line_editor; then
     source <(fzf --zsh)
 fi
 

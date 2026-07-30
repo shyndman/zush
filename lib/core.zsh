@@ -38,11 +38,22 @@ _zush_source() {
     fi
 }
 
-# True under a dumb terminal (TERM=dumb): no ZLE / line editor, and prompts
-# like starship refuse to render. Guards interactive-only setup that would
-# otherwise error (bindkey on empty key sequences, fzf option restore, etc.).
+# True under a dumb terminal (TERM=dumb): minimal capability set, no cursor
+# movement/colors/arrow-key terminfo entries. Starship refuses to render under
+# it, so this gates starship init and the instant prompt only. NOTE: TERM=dumb
+# can still have single-line ZLE, so do NOT use this to guard ZLE/key bindings.
 _zush_term_is_dumb() {
     [[ "$TERM" == "dumb" ]]
+}
+
+# True when the Zsh Line Editor is actually usable: an interactive shell with
+# the zle option enabled and stdin attached to a terminal. ZLE requires all
+# three per the zsh manual ("the ZLE option is set ... and the shell input is
+# attached to the terminal"). Gate zle widgets, bindkey, and integrations like
+# `fzf --zsh` on this so they don't error when stdin is not a tty
+# (forced-interactive shells, editors running zsh as a subprocess, pipes, etc.).
+_zush_has_line_editor() {
+    [[ -o interactive && -o zle && -t 0 ]]
 }
 
 # Eval cache maintenance shared across modules
