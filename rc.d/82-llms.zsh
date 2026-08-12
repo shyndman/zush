@@ -1,18 +1,13 @@
 # OpenCode Aliases
 
-LW_MODEL='google/gemini-3.1-flash-lite-preview --thinking=high'
-HW_MODEL='openai/gpt-5.4 --thinking=high'
-COMPLETE_MODEL='gpt-5.4-mini'
+LW_MODEL='openai-codex/gpt-5.6-luna --thinking=medium'
+HW_MODEL='openai-codex/gpt-5.6-sol --thinking=medium'
+COMPLETE_MODEL='gpt-5.6-luna'
 
 alias dpi='kitty @ launch --type=overlay --cwd=current --copy-env "$(command -v omp)"'
 alias dpic='dpi --continue'
 alias dpirl="dpi --model=$LW_MODEL"
 alias dpirh="dpi --model=$HW_MODEL"
-
-alias oc='opencode'
-alias occ='opencode --continue'
-alias ocrl="opencode run --model=$LW_MODEL"
-alias ocrh="opencode run --model=$HW_MODEL --variant=high"
 
 # Queries an LLM, displaying the result with glow.
 # Uses llm-tools-exa package (https://github.com/daturkel/llm-tools-exa)
