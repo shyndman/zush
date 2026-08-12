@@ -27,6 +27,14 @@ repos:
 
   - repo: local
     hooks:
+      - id: generate-bash-completion-stubs
+        name: generate lazy Bash completion stubs
+        entry: scripts/generate-bash-completion-stubs.sh
+        language: script
+        pass_filenames: false
+        files: >-
+          ^(completions/bash/.*|scripts/generate-bash-completion-stubs\.sh)$
+
       - id: zsh-syntax-check
         name: zsh -n syntax check
         entry: scripts/pre-commit-zsh-syntax.sh

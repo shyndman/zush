@@ -13,6 +13,7 @@ zstyle ':completion:*' menu select # use menu selection for completions
 
 # Add Zush completions directory to FPATH
 typeset -g ZUSH_COMPLETIONS_DIR="${ZUSH_HOME}/completions"
+typeset -g ZUSH_BASH_COMPLETIONS_DIR="${ZUSH_COMPLETIONS_DIR}/bash"
 
 if [[ -d "$ZUSH_COMPLETIONS_DIR" ]]; then
     # Add to beginning of FPATH for priority
@@ -32,7 +33,6 @@ if [[ -d ~/.local/share/zsh/site-functions ]]; then
     zush_debug "Added user site-functions to FPATH: ~/.local/share/zsh/site-functions"
 fi
 
-# Completion system is initialized early in .zshrc
 # Just set up caching optimization here
 _zush_manage_completion_cache() {
     local zcompdump="${ZUSH_CACHE_DIR}/.zcompdump"
