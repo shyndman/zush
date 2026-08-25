@@ -1,68 +1,27 @@
 #compdef git-wt
-#description manage worktrees under the primary checkout
-
-_git-wt() {
-  local curcontext="$curcontext" state state_descr line
-  local -A opt_args
-  local ret=1
-
-  _arguments -C \
-    ':subcommand:->command' \
-    '*::argument:->argument' && ret=0
-
-  case $state in
-    command)
-      local -a commands=(
-        'init:initialize worktree files'
-        'add:add a managed worktree'
-        'rm:remove a managed worktree'
-        'completions:print Zsh completions'
-      )
-      _describe -t commands 'git wt command' commands && ret=0
-      ;;
-    argument)
-      case $line[1] in
-        add)
-          _arguments \
-            '--force[pass force behavior to git worktree add]' \
-            ':worktree name:' && ret=0
-          ;;
-        rm)
-          _arguments \
-            '--force[remove a worktree with uncommitted changes or submodules]' \
-            ':worktree name:_git_wt_managed_worktrees' && ret=0
-          ;;
-        init|completions)
-          _message 'no arguments' && ret=0
-          ;;
-      esac
-      ;;
-  esac
-
-  return ret
+_git_wt_managed_worktrees () {
+	local common_directory repository_root managed_prefix line worktree_path name
+	local -a worktrees=() 
+	common_directory=$(command git rev-parse --path-format=absolute --git-common-dir 2>/dev/null)  || return 1
+	repository_root=${common_directory:h} 
+	managed_prefix="${repository_root}/${GIT_WT_WORKTREES_DIRECTORY_NAME}/" 
+	while IFS= read -r line
+	do
+		if [[ $line == worktree\ * ]]
+		then
+			worktree_path=${line#worktree } 
+			if [[ $worktree_path == ${managed_prefix}* ]]
+			then
+				name=${worktree_path#$managed_prefix} 
+				if [[ -n $name && $name != */* ]]
+				then
+					worktrees+=("$name") 
+				fi
+			fi
+		fi
+	done < <(command git worktree list --porcelain 2>/dev/null)
+	_describe -t worktrees 'managed worktree' worktrees
 }
-
-_git_wt_managed_worktrees() {
-  local common_directory repository_root managed_prefix line path name
-  local -a worktrees=()
-
-  common_directory=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null) || return 1
-  repository_root=${common_directory:h}
-  managed_prefix="${repository_root}/.worktrees/"
-
-  while IFS= read -r line; do
-    if [[ $line == worktree\ * ]]; then
-      path=${line#worktree }
-      if [[ $path == ${managed_prefix}* ]]; then
-        name=${path#$managed_prefix}
-        if [[ -n $name && $name != */* ]]; then
-          worktrees+=("$name")
-        fi
-      fi
-    fi
-  done < <(git worktree list --porcelain 2>/dev/null)
-
-  _describe -t worktrees 'managed worktree' worktrees
+_git-wt () {
+	_arguments -s '--init[initialize worktree files]' '--completions[print Zsh completions]' '--rm[remove a managed worktree]' '--force[pass force behavior to git worktree]' '1:worktree name:_git_wt_managed_worktrees'
 }
-
-_git-wt "$@"
