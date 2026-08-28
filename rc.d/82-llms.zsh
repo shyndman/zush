@@ -70,14 +70,17 @@ q() {
     esac
   done
 
-  local -a llm_cmd=(llm -T Exa)
+  local -a llm_cmd=(llm -T WebSearch)
 
   if [ $add_system_prompt -eq 1 ]; then
     llm_cmd+=(--system "You are a helpful assistant appearing in the context of the user's terminal.
 
 		* Please be concise. It's unpleasant for the user to read too much in this environment.
 		* Respond quickly — the terminal is blocked awaiting your complete response. Only use search if up-to-date information is required or requested.
-		* Use Markdown in your response.")
+		* Use Markdown in your response.
+
+    The date is $(date +%F).
+    ")
   fi
 
   llm_cmd+=("${passthrough_args[@]}")
