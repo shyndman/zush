@@ -41,6 +41,7 @@ zush_clean          # Clean all caches and plugins
 Hooks currently enforce:
 - `shellcheck` (with Zsh-friendly flags) on rc.d scripts, `home/.zshenv`, `install.sh`, and any shell helpers under `scripts/`.
 - `shfmt --diff` on Bash-compatible scripts (`install.sh`, `scripts/*.sh`).
+- Lazy Bash completion stub generation, excluding insecure completion directories so the hook runs unattended in CI.
 - `zsh -n` syntax validation across `.zsh/.sh` sources plus completions.
 - A `zcompile` dry run on `lib/*.zsh`, `rc.d/*.zsh`, and `home/.zshenv` to ensure everything remains compilable.
 

@@ -10,7 +10,7 @@ registered_commands() {
 
     zsh -f -c '
         autoload -Uz compinit bashcompinit
-        compinit -D
+        compinit -i -D
         bashcompinit
 
         typeset -A registrations_before
