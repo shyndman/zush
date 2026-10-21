@@ -16,4 +16,3 @@ alias opr='op run --no-masking --env-file .env -- '
 
 # Kittens
 alias kssh='kitten ssh'
-alias icat="kitten icat"

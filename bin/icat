@@ -1,0 +1,58 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+log_error() {
+    printf 'icat: %s\n' "$*" >&2
+}
+
+if (( $# != 1 )); then
+    log_error 'usage: icat IMAGE_PATH'
+    exit 2
+fi
+
+image_path="$1"
+if [[ ! -f "$image_path" || ! -r "$image_path" ]]; then
+    log_error "cannot read image: $image_path"
+    exit 1
+fi
+
+for dependency in magick base64; do
+    if ! command -v "$dependency" >/dev/null 2>&1; then
+        log_error "$dependency is required"
+        exit 1
+    fi
+done
+
+# PNG is supported directly by Kitty's graphics protocol. Read from stdin so
+# filenames containing ImageMagick option or selector syntax remain literal.
+if ! payload=$(magick - png:- <"$image_path" | base64 --wrap=0); then
+    log_error "failed to encode image: $image_path"
+    exit 1
+fi
+
+# The protocol limits each base64 payload to 4096 bytes. Only the first
+# chunk carries transmission metadata; m=0 finishes the transmission.
+readonly CHUNK_SIZE=4096
+payload_length=${#payload}
+metadata='a=T,f=100,t=d,q=2,'
+
+for (( offset=0; offset<payload_length; offset+=CHUNK_SIZE )); do
+    more=1
+    if (( offset + CHUNK_SIZE >= payload_length )); then
+        more=0
+    fi
+
+    if ! printf '\033_G%sm=%d;%s\033\134' \
+        "$metadata" "$more" "${payload:offset:CHUNK_SIZE}"; then
+        log_error 'failed to write image to terminal'
+        exit 1
+    fi
+
+    metadata=''
+done
+
+if ! printf '\n'; then
+    log_error 'failed to write trailing newline'
+    exit 1
+fi
