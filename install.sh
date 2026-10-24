@@ -67,13 +67,6 @@ check_dependencies() {
         exit 1
     fi
 
-    if ! command -v starship >/dev/null 2>&1; then
-        log_warning "starship is not installed."
-        echo "   Zush will work without it, but instant prompts require starship."
-        echo "   Install from: https://starship.rs/"
-        echo ""
-    fi
-
     check_linux_build_packages
 
     log_success "Dependencies checked"
@@ -156,31 +149,22 @@ install_tools() {
     # Phase 1: Core package manager (Homebrew)
     install_brew
 
-    # Phase 2: Language Runtimes
-    install_python
-    install_nvm_and_node
-    install_rustup_and_rust
-
-    # Phase 3: Language-dependent tools
-    install_hishtory
-    install_pip_tools
-    install_llm_plugins
-
-    # Phase 4: Homebrew-based tools
+    # Phase 2: Homebrew-based tools
     local brew_tools=(
         bat
         bat-extras
         btop
+        can1357/tap/omp
         eza
         fd
         git-delta
         go-task
         imagemagick
         moor
-        opencode
         procs
         python-yq
         ripgrep
+        rustup
         starship
         trash-cli
         uv
@@ -223,113 +207,6 @@ install_brew() {
         log_error "Homebrew installation failed."
         exit 1
     fi
-}
-
-install_python() {
-    if command -v python3 >/dev/null 2>&1 && python3 -m pip --version >/dev/null 2>&1; then
-        return
-    fi
-
-    log_info "Installing Python via Homebrew..."
-    install_brew_tool "python" "python3"
-
-    if ! command -v python3 >/dev/null 2>&1 || ! python3 -m pip --version >/dev/null 2>&1; then
-        log_error "Python installation failed."
-        exit 1
-    fi
-
-    log_success "Python installed."
-}
-
-install_nvm_and_node() {
-    local nvm_command="nvm"
-
-    if ! command -v "$nvm_command" >/dev/null 2>&1 && ! brew_package_installed "nvm"; then
-        install_brew_tool "nvm"
-    fi
-    export NVM_DIR="$HOME/.nvm"
-    [ -s "$(brew --prefix)/opt/nvm/nvm.sh" ] && \. "$(brew --prefix)/opt/nvm/nvm.sh"
-
-    if command -v nvm >/dev/null 2>&1 && ! nvm ls stable >/dev/null 2>&1; then
-        if confirm_install "Node.js (stable)"; then
-            log_info "Installing stable Node.js via nvm..."
-            nvm install stable
-            nvm alias default stable
-            log_success "Node.js stable installed and set as default."
-        fi
-    fi
-}
-
-install_rustup_and_rust() {
-    if ! command -v rustup >/dev/null 2>&1; then
-        install_brew_tool "rustup-init"
-        if command -v rustup-init >/dev/null 2>&1; then
-            log_info "Running rustup-init. Please follow the prompts."
-            rustup-init -y --no-modify-path
-            source "$HOME/.cargo/env"
-        fi
-    fi
-    if command -v rustup >/dev/null 2>&1 && ! rustup toolchain list | grep -q "stable"; then
-        if confirm_install "Rust (stable toolchain)"; then
-            log_info "Installing stable Rust toolchain..."
-            rustup default stable
-            log_success "Rust stable toolchain installed."
-        fi
-    fi
-}
-
-install_hishtory() {
-    if ! command -v hishtory >/dev/null 2>&1; then
-        if confirm_install "hishtory"; then
-            log_info "Installing hishtory..."
-            echo -n "   Please enter your hishtory secret: "
-            read -r secret </dev/tty
-            if [[ -n $secret ]]; then
-                export HISHTORY_INSTALL_SECRET="$secret"
-                curl https://hishtory.dev/install.py | python3 -
-                hishtory init
-                log_success "hishtory installed."
-            else
-                log_error "Hishtory secret cannot be empty. Skipped installation."
-            fi
-        fi
-    fi
-}
-install_pip_tools() {
-    if ! python3 -m pip list | grep -q "^llm\s"; then
-        if confirm_install "llm CLI"; then
-            log_info "Installing llm via pip..."
-            python3 -m pip install llm
-            log_success "llm installed."
-        fi
-    fi
-}
-
-install_llm_plugins() {
-    if ! command -v llm >/dev/null 2>&1; then
-        return
-    fi
-
-    log_info "Checking for llm plugins..."
-
-    local llm_plugins=(
-        "llm-gemini"
-        "llm-anthropic"
-        "llm-tools-exa"
-        "git+https://github.com/shyndman/llm-complete-command.git"
-    )
-
-    for plugin in "${llm_plugins[@]}"; do
-        local plugin_name
-        plugin_name=$(basename "$plugin" .git)
-        if ! llm plugins | grep -q "$plugin_name"; then
-            if confirm_install "llm plugin: $plugin_name"; then
-                log_info "Installing $plugin_name via llm..."
-                llm install -U "$plugin"
-                log_success "$plugin_name installed."
-            fi
-        fi
-    done
 }
 
 brew_is_available() {
