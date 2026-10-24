@@ -14,6 +14,17 @@ A performance-aware ZSH configuration designed for sub-200ms startup times while
 curl -fsSL https://raw.githubusercontent.com/shyndman/zush/main/install.sh | zsh
 ```
 
+Pass `-y` to install every missing optional tool without individual confirmations:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/shyndman/zush/main/install.sh | zsh -s -- -y
+```
+
+Existing tools are skipped. With `-y`, an existing Zush installation is preserved:
+the installer declines reinstall automatically and exits successfully after tool
+setup. Replacing `.zshenv` still requires confirmation; Homebrew's own installation
+prompts are unchanged.
+
 On failure, rollback removes only the checkout created by the current installer run
 and restores `.zshenv` only when that run created its backup.
 

@@ -18,6 +18,7 @@ ZUSH_REPO="https://github.com/shyndman/zush.git"
 ZUSH_DIR="$HOME/.config/zush"
 ZSHENV_FILE="$HOME/.zshenv"
 STARSHIP_DIR="$HOME/.config/starship"
+typeset -gi ZUSH_INSTALL_ALL_TOOLS=0
 
 # Rollback owns only changes made by this installer run.
 typeset -gi ZUSH_CLONE_STARTED=0
@@ -135,6 +136,11 @@ check_linux_build_packages() {
 
 # Utility function for interactive confirmation
 confirm_install() {
+    if ((ZUSH_INSTALL_ALL_TOOLS)); then
+        log_info "Automatically accepting installation of $1 (-y)"
+        return 0
+    fi
+
     echo -n "   Install $1? [y/N] "
     read -r response </dev/tty 2>/dev/null || response=""
     case "$response" in
@@ -322,6 +328,11 @@ install_brew_tool_with_source() {
 handle_existing_installation() {
     if [[ -d $ZUSH_DIR ]]; then
         log_warning "Zush is already installed at $ZUSH_DIR"
+        if ((ZUSH_INSTALL_ALL_TOOLS)); then
+            log_info "Declining reinstall automatically (-y); existing installation preserved."
+            exit 0
+        fi
+
         echo -n "   Remove existing installation and reinstall? [y/N] "
         read -r response </dev/tty 2>/dev/null || response=""
         case "$response" in
@@ -591,6 +602,19 @@ rollback() {
 
 # Main installation
 main() {
+    local option
+    local OPTIND=1
+    while getopts ":y" option; do
+        case "$option" in
+        y) ZUSH_INSTALL_ALL_TOOLS=1 ;;
+        *)
+            log_error "Unknown option: -$OPTARG"
+            echo "Usage: zsh install.sh [-y]"
+            return 1
+            ;;
+        esac
+    done
+
     # Set up error handling
     trap rollback ERR
 
