@@ -17,6 +17,9 @@ curl -fsSL https://raw.githubusercontent.com/shyndman/zush/main/install.sh | zsh
 On failure, rollback removes only the checkout created by the current installer run
 and restores `.zshenv` only when that run created its backup.
 
+Instant Starship configuration generation uses `tomlq` to replace slow module
+tables with `disabled = true`, preserving the rest of the configuration.
+
 ## Features
 
 - **Instant Prompts** - Basic prompt appears immediately, full prompt loads after ~129ms

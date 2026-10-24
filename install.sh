@@ -179,6 +179,7 @@ install_tools() {
         moor
         opencode
         procs
+        python-yq
         ripgrep
         starship
         trash-cli
@@ -560,11 +561,9 @@ check_starship_config() {
             return
             ;;
         *)
-            # Copy existing config and append disable rules
+            # Copy existing config and replace slow module tables.
             cat "$starship_config" >"$instant_config"
-            cat >>"$instant_config" <<'EOF'
-
-# Disable slow modules for instant prompts
+            STARSHIP_DISABLED_FEATURES=$(echo "# Disable slow modules for instant prompts
 [git_branch]
 disabled = true
 
@@ -602,8 +601,8 @@ disabled = true
 disabled = true
 
 [env_var]
-disabled = true
-EOF
+disabled = true" | tomlq)
+            tomlq --toml-roundtrip --in-place ". += $STARSHIP_DISABLED_FEATURES" "$instant_config"
             log_success "Created instant starship configuration"
             ;;
         esac
