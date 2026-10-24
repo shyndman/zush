@@ -14,6 +14,9 @@ A performance-aware ZSH configuration designed for sub-200ms startup times while
 curl -fsSL https://raw.githubusercontent.com/shyndman/zush/main/install.sh | zsh
 ```
 
+On failure, rollback removes only the checkout created by the current installer run
+and restores `.zshenv` only when that run created its backup.
+
 ## Features
 
 - **Instant Prompts** - Basic prompt appears immediately, full prompt loads after ~129ms

@@ -19,6 +19,10 @@ ZUSH_DIR="$HOME/.config/zush"
 ZSHENV_FILE="$HOME/.zshenv"
 STARSHIP_DIR="$HOME/.config/starship"
 
+# Rollback owns only changes made by this installer run.
+typeset -gi ZUSH_CLONE_STARTED=0
+typeset -gi ZUSH_ZSHENV_BACKED_UP=0
+
 # Utility functions
 log_info() { echo -e "${BLUE}ℹ${NC} $*"; }
 log_success() { echo -e "${GREEN}✓${NC} $*"; }
@@ -491,6 +495,7 @@ backup_zshenv() {
         fi
 
         cp "$ZSHENV_FILE" "$backup_file"
+        ZUSH_ZSHENV_BACKED_UP=1
         log_success "Backed up .zshenv to .zshenv.old"
     fi
 }
@@ -499,10 +504,11 @@ backup_zshenv() {
 clone_repository() {
     log_info "Cloning Zush repository..."
 
+    ZUSH_CLONE_STARTED=1
     if ! git clone --depth=1 "$ZUSH_REPO" "$ZUSH_DIR" 2>/dev/null; then
         log_error "Failed to clone repository"
         echo "   Check your internet connection and try again."
-        exit 1
+        rollback
     fi
 
     log_success "Repository cloned to $ZUSH_DIR"
@@ -694,11 +700,12 @@ show_success() {
 rollback() {
     log_error "Installation failed, rolling back..."
 
-    # Remove Zush directory
-    [[ -d $ZUSH_DIR ]] && rm -rf "$ZUSH_DIR"
+    if ((ZUSH_CLONE_STARTED)) && [[ -d $ZUSH_DIR ]]; then
+        log_info "Removing checkout created by this installation"
+        rm -rf "$ZUSH_DIR"
+    fi
 
-    # Restore .zshenv backup
-    if [[ -f "${ZSHENV_FILE}.old" ]]; then
+    if ((ZUSH_ZSHENV_BACKED_UP)); then
         mv "${ZSHENV_FILE}.old" "$ZSHENV_FILE"
         log_info "Restored original .zshenv"
     fi
