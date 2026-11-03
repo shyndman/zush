@@ -18,6 +18,7 @@ Zush is a modular, performance-aware zsh configuration system designed to achiev
 │   ├── compiler.zsh     # automatic zcompile functionality
 │   ├── lazy-loader.zsh  # generic lazy loading with environment caching
 │   ├── plugin.zsh       # plugin management system (zushp commands)
+│   ├── completions.zsh  # completion mirroring and cache helpers
 │   └── instant-prompt.zsh # instant prompt system
 ├── plugins/             # Third-party plugins (managed by zushp)
 ├── completions/         # Custom completions directory
@@ -102,6 +103,11 @@ Zush is a modular, performance-aware zsh configuration system designed to achiev
 - Smart environment caching
 
 ## Technical Implementation Details
+
+### `lib/` vs `rc.d/` Boundary
+
+- `lib/*.zsh` holds Zush's internal machinery, multi-step helpers, caching logic, and public/private API functions (`zush_*`, `_zush_*`, `zushp*`, `_zushc*`).
+- `rc.d/*.zsh` scripts are lightweight, declarative, user-level configuration files (options, aliases, paths, `zstyle` rules, small shell wrappers, and calls into `lib/`). Heavy implementation logic belongs in `lib/` and should be invoked from `rc.d/`.
 
 ### Function Naming Convention
 

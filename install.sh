@@ -598,6 +598,56 @@ disabled = true" | tomlq)
     fi
 }
 
+# Offer to create machine-specific zstyle config
+create_zushstyles() {
+    log_info "Setting up machine-specific zstyle configuration..."
+
+    local zushstyles_file="$HOME/.zushstyles"
+
+    echo ""
+    echo "${BLUE}About ~/.zushstyles:${NC}"
+    echo "  • Machine-specific zstyle configuration for Zush"
+    echo "  • Loads before rc.d scripts so plugins and completions see your styles"
+    echo "  • Automatically compiled for performance"
+    echo "  • Stays out of version control"
+    echo ""
+
+    if [[ -f $zushstyles_file ]]; then
+        log_info "~/.zushstyles already exists, skipping creation"
+        return
+    fi
+
+    echo -n "   Create ~/.zushstyles with example configurations? [Y/n] "
+    { read -r response </dev/tty; } 2>/dev/null || response=""
+    case "$response" in
+    [nN][oO] | [nN])
+        log_info "Skipping ~/.zushstyles creation"
+        echo "   You can create it later with machine-specific zstyles"
+        ;;
+    *)
+        local mirror_insecure_line="# zstyle ':zush:completions' mirror-insecure yes"
+        if ((EUID == 0)); then
+            mirror_insecure_line="zstyle ':zush:completions' mirror-insecure yes"
+        fi
+
+        log_info "Creating ~/.zushstyles..."
+        cat >"$zushstyles_file" <<EOF
+# ~/.zushstyles - Machine-specific Zush zstyle configuration
+# Loaded before rc.d scripts so plugins and completion setup can read these styles
+
+# Mirror non-root-owned fpath completion directories into a root-owned cache
+# when running as root so compaudit passes without prompting:
+${mirror_insecure_line}
+
+# Example: Disable ez-compinit's 20-hour zcompdump cache
+# zstyle ':plugin:ez-compinit' 'use-cache' 'no'
+EOF
+        chmod 644 "$zushstyles_file"
+        log_success "Created ~/.zushstyles"
+        ;;
+    esac
+}
+
 # Offer to create machine-specific config
 create_zushrc() {
     log_info "Setting up machine-specific configuration..."
@@ -674,6 +724,7 @@ show_success() {
     echo "Configuration:"
     echo "  ${BLUE}~/.config/zush/${NC}       - Main configuration"
     echo "  ${BLUE}~/.config/zush/rc.d/${NC}  - Modular configs"
+    echo "  ${BLUE}~/.zushstyles${NC}         - Machine-specific zstyles (pre-rc.d)"
     echo "  ${BLUE}~/.zushrc${NC}             - Machine-specific settings"
     echo ""
     if [[ -f "${ZSHENV_FILE}.old" ]]; then
@@ -735,6 +786,7 @@ main() {
     clone_repository
     install_zshenv
     check_starship_config
+    create_zushstyles
     create_zushrc
     show_success
 }

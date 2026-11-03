@@ -33,28 +33,5 @@ if [[ -d ~/.local/share/zsh/site-functions ]]; then
     zush_debug "Added user site-functions to FPATH: ~/.local/share/zsh/site-functions"
 fi
 
-# Just set up caching optimization here
-_zush_manage_completion_cache() {
-    local zcompdump="${ZUSH_CACHE_DIR}/.zcompdump"
-    local cache_max_age=$((24 * 60 * 60)) # 24 hours
-    local zcompdump_fresh=0
-
-    if [[ -f "$zcompdump" ]] && zmodload zsh/stat 2>/dev/null; then
-        local now zcompdump_mtime
-        (( now = EPOCHSECONDS ))
-        zcompdump_mtime=$(zstat -L +mtime -- "$zcompdump" 2>/dev/null)
-        if [[ -n "$zcompdump_mtime" ]] && (( zcompdump_mtime >= now - cache_max_age )); then
-            zcompdump_fresh=1
-        fi
-    fi
-
-    if (( zcompdump_fresh )); then
-        zush_debug "Completion cache is fresh"
-    else
-        # Rebuild cache in background to avoid blocking startup
-        (compinit -d "$zcompdump" &)
-        zush_debug "Rebuilding completion cache in background"
-    fi
-}
-
-_zush_manage_completion_cache
+# Mirror non-root-owned fpath directories when running as root (if configured via zstyle)
+_zush_mirror_insecure_completions

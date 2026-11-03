@@ -91,6 +91,7 @@ _zushc_all() {
     _zushc "${ZUSH_RC_DIR}"
     
     # Compile machine-specific config if it exists
+    [[ -f "${HOME}/.zushstyles" ]] && _zushc "${HOME}/.zushstyles"
     [[ -f "${HOME}/.zushrc" ]] && _zushc "${HOME}/.zushrc"
     
     # Compile completion dump if it exists
@@ -125,6 +126,7 @@ _zushc_clean() {
     unsetopt null_glob
     
     # Clean machine-specific config
+    [[ -f "${HOME}/.zushstyles.zwc" ]] && rm -f "${HOME}/.zushstyles.zwc"
     [[ -f "${HOME}/.zushrc.zwc" ]] && rm -f "${HOME}/.zushrc.zwc"
     
     # Clean completion dump
