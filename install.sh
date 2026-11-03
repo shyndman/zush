@@ -373,7 +373,7 @@ EOF
 
 install_brew_tool() {
     local tool_name="$1"
-    local command_name="${2:-$tool_name}"
+    local command_name="${2:-${tool_name##*/}}"
 
     if command -v "$command_name" >/dev/null 2>&1 || brew_package_installed "$tool_name"; then
         return
@@ -393,7 +393,7 @@ install_brew_tool() {
 
 install_brew_tool_with_source() {
     local tool_name="$1"
-    local command_name="${2:-$tool_name}"
+    local command_name="${2:-${tool_name##*/}}"
 
     if command -v "$command_name" >/dev/null 2>&1 || brew_package_installed "$tool_name"; then
         return
