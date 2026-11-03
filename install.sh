@@ -19,6 +19,7 @@ ZUSH_DIR="$HOME/.config/zush"
 ZSHENV_FILE="$HOME/.zshenv"
 STARSHIP_DIR="$HOME/.config/starship"
 typeset -gi ZUSH_INSTALL_ALL_TOOLS=0
+typeset -g ZUSH_BREW_OWNER=""
 
 # Rollback owns only changes made by this installer run.
 typeset -gi ZUSH_CLONE_STARTED=0
@@ -200,18 +201,116 @@ setup_brew_shellenv() {
     fi
 }
 
+resolve_brew_owner() {
+    local brew_target="${HOMEBREW_PREFIX:-$(command -v brew)}"
+    if [[ -z $brew_target ]]; then
+        log_error "Cannot determine Homebrew path to inspect ownership."
+        return 1
+    fi
+
+    local owner=""
+    if [[ $(uname -s) == "Darwin" ]]; then
+        owner=$(stat -L -f "%Su" "$brew_target" 2>/dev/null) || owner=""
+    else
+        owner=$(stat --dereference --format="%U" "$brew_target" 2>/dev/null) || owner=""
+    fi
+
+    if [[ -z $owner || $owner == "UNKNOWN" ]]; then
+        log_error "Failed to determine owner of Homebrew at $brew_target."
+        return 1
+    fi
+
+    echo "$owner"
+}
+
+run_brew() {
+    local brew_bin
+    brew_bin=$(command -v brew) || {
+        log_error "Homebrew binary not found in PATH."
+        return 1
+    }
+
+    if [[ -z $ZUSH_BREW_OWNER ]]; then
+        "$brew_bin" "$@"
+        return $?
+    fi
+
+    if command -v sudo >/dev/null 2>&1; then
+        (
+            cd /tmp &&
+                sudo --set-home --user="$ZUSH_BREW_OWNER" -- "$brew_bin" "$@"
+        )
+        return $?
+    fi
+
+    if command -v runuser >/dev/null 2>&1; then
+        local owner_home=""
+        if command -v getent >/dev/null 2>&1; then
+            owner_home=$(getent passwd "$ZUSH_BREW_OWNER" | cut --delimiter=: --fields=6)
+        fi
+
+        if [[ -z $owner_home ]]; then
+            log_error "Could not determine home directory for Homebrew owner '$ZUSH_BREW_OWNER'."
+            return 1
+        fi
+
+        (
+            cd /tmp &&
+                runuser --user="$ZUSH_BREW_OWNER" -- env \
+                    HOME="$owner_home" \
+                    USER="$ZUSH_BREW_OWNER" \
+                    LOGNAME="$ZUSH_BREW_OWNER" \
+                    "$brew_bin" "$@"
+        )
+        return $?
+    fi
+
+    log_error "Neither 'sudo' nor 'runuser' is available to execute Homebrew as '$ZUSH_BREW_OWNER'."
+    return 1
+}
+
 install_brew() {
+    setup_brew_shellenv
+
     if ! command -v brew >/dev/null 2>&1; then
+        if ((EUID == 0)); then
+            log_error "Homebrew is not installed and cannot be installed as root."
+            echo "   Install Homebrew as a non-root user first, then re-run this installer."
+            exit 1
+        fi
+
         log_info "Installing Homebrew..."
         /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
         log_success "Homebrew installed."
-    fi
 
-    setup_brew_shellenv
+        setup_brew_shellenv
+    fi
 
     if ! command -v brew >/dev/null 2>&1; then
         log_error "Homebrew installation failed."
         exit 1
+    fi
+
+    local current_user
+    current_user=$(id -un)
+
+    local brew_owner
+    brew_owner=$(resolve_brew_owner) || exit 1
+
+    if [[ $brew_owner == "root" ]]; then
+        log_error "Homebrew installation is owned by root, which Homebrew does not support."
+        exit 1
+    fi
+
+    ZUSH_BREW_OWNER=""
+    if [[ $current_user != "$brew_owner" ]]; then
+        if ((EUID != 0)); then
+            log_error "Homebrew is owned by '$brew_owner', and current user '$current_user' cannot switch users without root privileges."
+            exit 1
+        fi
+
+        ZUSH_BREW_OWNER="$brew_owner"
+        log_info "Detected Homebrew owner '$ZUSH_BREW_OWNER'; running Homebrew commands as '$ZUSH_BREW_OWNER'."
     fi
 }
 
@@ -221,7 +320,7 @@ brew_is_available() {
 
 brew_package_installed() {
     local package_name="$1"
-    brew_is_available && brew list --versions "$package_name" >/dev/null 2>&1
+    brew_is_available && run_brew list --versions "$package_name" >/dev/null 2>&1
 }
 
 update_user_zshrc_paths() {
@@ -287,7 +386,7 @@ install_brew_tool() {
 
     if confirm_install "$tool_name"; then
         log_info "Installing $tool_name via Homebrew..."
-        brew install "$tool_name"
+        run_brew install "$tool_name"
         log_success "$tool_name installed."
     fi
 }
@@ -310,13 +409,13 @@ install_brew_tool_with_source() {
     fi
 
     log_info "Installing $tool_name via Homebrew..."
-    if brew install "$tool_name"; then
+    if run_brew install "$tool_name"; then
         log_success "$tool_name installed."
         return
     fi
 
     log_warning "$tool_name failed to install from binaries; retrying from source..."
-    if brew install --build-from-source "$tool_name"; then
+    if run_brew install --build-from-source "$tool_name"; then
         log_success "$tool_name installed from source."
     else
         log_error "Failed to install $tool_name even from source."
