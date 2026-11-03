@@ -28,30 +28,6 @@ Zush is a modular, performance-aware zsh configuration system designed to achiev
 │   └── .zshenv          # Environment setup for ZDOTDIR
 ├── install.sh           # Remote installation script
 └── rc.d/                # Numbered configuration scripts
-    ├── 00-profiling.zsh      # profiling setup
-    ├── 01-compinit-plugin.zsh # compinit bootstrap for plugins
-    ├── 05-path.zsh           # path exports and prioritization
-    ├── 10-lazy-tools.zsh     # lazy loaders (brew, nvm, cargo, esp-idf)
-    ├── 15-misc-plugins.zsh   # personal plugin loading
-    ├── 20-zsh-options.zsh    # core zsh behavioral options
-    ├── 30-history.zsh        # comprehensive history management
-    ├── 40-directory-tools.zsh # directory navigation enhancements
-    ├── 41-dev-directories.zsh # development directory shortcuts
-    ├── 42-eza.zsh            # modern ls replacement with theme
-    ├── 50-editor.zsh         # smart editor selection (local vs remote)
-    ├── 51-text-navigation.zsh # shell text editing helpers
-    ├── 60-better-reading.zsh # ov pager, bat, batman integration
-    ├── 70-ffmpeg.zsh         # ffmpeg utilities with smart stereo downmix
-    ├── 80-misc-aliases.zsh   # frequently used shell aliases
-    ├── 81-docker.zsh         # docker compose shortcuts
-    ├── 81-fzf.zsh            # fzf integration
-    ├── 82-llms.zsh           # llm helper commands
-    ├── 83-systemd.zsh        # systemd helpers
-    ├── 84-git-worktrees.zsh  # git worktree helpers
-    ├── 86-completions.zsh    # completion system setup
-    ├── 90-prompt.zsh         # final prompt wiring
-    ├── 98-shell-hooks.zsh    # shell environment integration (direnv, hooks)
-    └── 99-profiling-end.zsh  # startup timing results
 ```
 
 ### Key Performance Features
